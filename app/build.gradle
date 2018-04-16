@@ -1,0 +1,59 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+//*************************************//
+// Add definitions here
+def FIREBASE_WEB_CLIENT_KEY = '"' + FirebaseWebClientKey + '"' ?: '"Define Your Firebase Google Client Key"'
+def FIREBASE_WEB_CLIENT_SECRET = '"' + FirebaseWebClientSecretKey + '"' ?: '"Define the Firebase Google Client Secret Key"'
+def GOOGLE_MAP_API_KEY = '"' + GoogleMapApiKey + '"' ?: '"Obtain A Google Map API key and define it in gradle.properties"'
+
+def STRING_ARRAY = 'String[]'
+def STRING = 'String'
+def BOOLEAN = 'boolean'
+//************************************//
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.lxdnz.nz.ariaorienteering"
+        minSdkVersion 18
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //****DEFINE THE VARIABLES HERE****//
+        //Sync the file when your done adding new keys
+        each { type ->
+            //type.buildConfigField 'DATATYPE','KEYNAME', '\"GRADLE VARIABLE\"'
+            type.buildConfigField STRING, 'FirebaseWebClientKey', FIREBASE_WEB_CLIENT_KEY
+            type.buildConfigField STRING, 'FirebaseWebClientSecretKey', FIREBASE_WEB_CLIENT_SECRET
+            type.buildConfigField STRING, 'GoogleMapApiKey', GOOGLE_MAP_API_KEY
+        }
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.firebase:firebase-database:11.8.0'
+    implementation 'com.google.firebase:firebase-auth:11.8.0'
+    implementation 'com.google.android.gms:play-services-auth:11.8.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
+
+apply plugin: 'com.google.gms.google-services'

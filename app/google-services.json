@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "292376558798",
+    "firebase_url": "https://aria-orienteerin-1521239818572.firebaseio.com",
+    "project_id": "aria-orienteerin-1521239818572",
+    "storage_bucket": "aria-orienteerin-1521239818572.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292376558798:android:b8b2307a1548f0bc",
+        "android_client_info": {
+          "package_name": "com.lxdnz.nz.ariaorienteering"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "292376558798-8b7uq1hdes4t40gnl5hi2b1l6gu30nhv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lxdnz.nz.ariaorienteering",
+            "certificate_hash": "67866ea0010393ecdc5f13bfa94931f4d8f070e4"
+          }
+        },
+        {
+          "client_id": "292376558798-3ndge8m9r4qsjt3gejmcmv0jf3vq6ku0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAs7Wn1qmQgfYBtpL0RNffZEdwoR3fO1Nc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "292376558798-3ndge8m9r4qsjt3gejmcmv0jf3vq6ku0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
