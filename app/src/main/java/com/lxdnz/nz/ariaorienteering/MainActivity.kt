@@ -1,5 +1,7 @@
 package com.lxdnz.nz.ariaorienteering
 
+import android.content.Intent
+import android.net.Uri
 import android.support.design.widget.TabLayout
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -14,11 +16,20 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
+import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
+import com.lxdnz.nz.ariaorienteering.fragments.MapFragment
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionListener,
+        MapFragment.OnFragmentInteractionListener, HelpFragment.OnFragmentInteractionListener {
+
+    // required for callback implementation from Fragments
+    override fun onFragmentInteraction(uri: Uri) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -46,8 +57,8 @@ class MainActivity : AppCompatActivity() {
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            val i = Intent(this, CompassActivity::class.java)
+            startActivity(i)
         }
 
     }
@@ -79,10 +90,15 @@ class MainActivity : AppCompatActivity() {
      */
     inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): Fragment? = when (position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1)
+            //return PlaceholderFragment.newInstance(position + 1)
+            0 -> HomeFragment.newInstance(position.toString(), "")
+            // Other Fragments Here
+            1 -> MapFragment.newInstance(position.toString(), "")
+            2 -> HelpFragment.newInstance(position.toString(), "")
+            else -> null
         }
 
         override fun getCount(): Int {
