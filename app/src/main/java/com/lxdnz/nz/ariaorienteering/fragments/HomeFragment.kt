@@ -48,7 +48,7 @@ class HomeFragment : Fragment() {
     // make changes here to id'd view items
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        home_text.text = getString(R.string.change_home)
+        home_text.text = getString(R.string.change_home) + ' ' + param2
     }
 
     // TODO: Rename method, update argument and hook method into UI event

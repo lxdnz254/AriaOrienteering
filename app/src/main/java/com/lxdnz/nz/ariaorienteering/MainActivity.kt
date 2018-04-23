@@ -26,6 +26,9 @@ import kotlinx.android.synthetic.main.fragment_main.view.*
 class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener, HelpFragment.OnFragmentInteractionListener {
 
+    private var LOGGED_IN = "Logged Out"
+    lateinit private var saveState: Bundle
+
     // required for callback implementation from Fragments
     override fun onFragmentInteraction(uri: Uri) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -56,11 +59,21 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
+        // Login Intent
+        val i = Intent(this, LoginActivity::class.java)
+        // Button Listener
+
         fab.setOnClickListener { view ->
-            val i = Intent(this, CompassActivity::class.java)
             startActivity(i)
         }
 
+        // check if logged in : Launch Login Activity if not
+        if (savedInstanceState == null || !savedInstanceState.getBoolean(LOGGED_IN)) {
+            startActivity(i)
+        } else {
+            //TODO: Update the LOGGED_IN text on the UI
+            LOGGED_IN = "Logged In"
+        }
     }
 
 
@@ -94,7 +107,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             //return PlaceholderFragment.newInstance(position + 1)
-            0 -> HomeFragment.newInstance(position.toString(), "")
+            0 -> HomeFragment.newInstance(position.toString(),LOGGED_IN)
             // Other Fragments Here
             1 -> MapFragment.newInstance(position.toString(), "")
             2 -> HelpFragment.newInstance(position.toString(), "")

@@ -15,14 +15,6 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:gravity="center"
-            android:text="@string/title_text"
-            android:textSize="30sp" />
 
         <TextView
             android:id="@+id/tvStatus"
@@ -31,6 +23,24 @@
             android:padding="4sp"
             android:text="@string/signed_out"
             android:textSize="18sp" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/firstNameWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/firstname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:hint="First Name"
+                android:inputType="textPersonName"
+                android:padding="4sp" />
+
+
+        </android.support.design.widget.TextInputLayout>
 
         <TextView
             android:id="@+id/tvDetail"
@@ -75,7 +85,8 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_weight="1"
-                android:text="@string/action_sign_out_short" />
+                android:text="@string/action_sign_out_short"
+                style="?android:attr/buttonBarButtonStyle"/>
 
             <Button
                 android:id="@+id/btn_disconnect"
@@ -84,7 +95,8 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_weight="1"
-                android:text="@string/disconnect" />
+                android:text="@string/disconnect"
+                style="?android:attr/buttonBarButtonStyle"/>
         </LinearLayout>
 
     </RelativeLayout>
