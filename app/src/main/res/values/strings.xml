@@ -20,6 +20,7 @@
     <string name="verify_email">Verify Email</string>
     <string name="fail_auth">Authentication failed!</string>
     <string name="disconnect">Disconnect</string>
+    <string name="start">Start</string>
     <string name="title_activity_main">Aria Orienteering</string>
     <string name="tab_text_1">Home</string>
     <string name="tab_text_2">Map</string>

@@ -19,8 +19,11 @@ import android.support.design.widget.TextInputLayout
 import android.view.inputmethod.InputMethodManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.GoogleAuthProvider
+import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.model.User
-
+import nl.komponents.kovenant.task
+import nl.komponents.kovenant.then
+import nl.komponents.kovenant.ui.successUi
 
 
 /**
@@ -48,7 +51,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
         saveState = savedInstanceState
         btn_sign_in.setOnClickListener(this)
         btn_sign_out.setOnClickListener(this)
-        btn_disconnect.setOnClickListener(this)
+        btn_start.setOnClickListener(this)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(WEB_CLIENT_ID)
@@ -69,9 +72,8 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
         val currentUser = mAuth!!.currentUser
         Log.i(TAG, "Current User:" + currentUser?.uid )
 
-        User.retrieve(currentUser?.uid).addOnCompleteListener { task -> updateUI(task.result) }
-
-
+        task {  User.retrieve(currentUser?.uid) } then
+                {task -> task.addOnCompleteListener{user -> updateUI(user.result)} }
     }
 
     override fun onClick(view: View?) {
@@ -80,7 +82,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
         when(i) {
             R.id.btn_sign_in -> signIn()
             R.id.btn_sign_out -> signOut()
-            R.id.btn_disconnect -> revokeAccess()
+            R.id.btn_start -> finish()
         }
     }
 
@@ -118,7 +120,6 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
                         updateUI(activeUser)
                         // return to main
                         saveState?.putBoolean(LOGGED_IN, true)
-                        finish()
                     } else {
                         // Sign in fails
                         Log.w(TAG, "signInWithCredential: Failed!", task.exception)
@@ -178,7 +179,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
 
             firstNameWrapper.visibility = View.GONE
             btn_sign_in.visibility = View.GONE
-            layout_sign_out_and_disconnect.visibility = View.VISIBLE
+            layout_sign_out_and_start.visibility = View.VISIBLE
         } else {
             tvStatus.text = getString(R.string.signed_out)
             tvDetail.text = null
@@ -186,7 +187,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
             firstNameWrapper.visibility = View.VISIBLE
             firstNameWrapper.isFocused
             btn_sign_in.visibility = View.VISIBLE
-            layout_sign_out_and_disconnect.visibility = View.GONE
+            layout_sign_out_and_start.visibility = View.GONE
         }
     }
 

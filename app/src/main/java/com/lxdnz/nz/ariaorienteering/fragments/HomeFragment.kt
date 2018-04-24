@@ -7,9 +7,13 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.firebase.auth.FirebaseAuth
 
 import com.lxdnz.nz.ariaorienteering.R
+import com.lxdnz.nz.ariaorienteering.model.User
 import kotlinx.android.synthetic.main.fragment_home.*
+import nl.komponents.kovenant.task
+import nl.komponents.kovenant.then
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -48,12 +52,20 @@ class HomeFragment : Fragment() {
     // make changes here to id'd view items
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         home_text.text = getString(R.string.change_home) + ' ' + param2
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     fun onButtonPressed(uri: Uri) {
         listener?.onFragmentInteraction(uri)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        task {  User.retrieve(FirebaseAuth.getInstance().currentUser?.uid) } then
+                {task -> task.addOnCompleteListener{user ->
+                    home_text.text = getString(R.string.change_home) + ' ' + user.result.firstName } }
     }
 
     override fun onAttach(context: Context) {
