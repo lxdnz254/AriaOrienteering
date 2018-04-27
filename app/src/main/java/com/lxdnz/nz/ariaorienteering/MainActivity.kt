@@ -1,6 +1,8 @@
 package com.lxdnz.nz.ariaorienteering
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.support.design.widget.TabLayout
 import android.support.design.widget.Snackbar
@@ -11,23 +13,38 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.fragments.MapFragment
+import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.services.GPSTracker
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.task
+import nl.komponents.kovenant.then
 
 class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionListener,
         MapFragment.OnFragmentInteractionListener, HelpFragment.OnFragmentInteractionListener {
 
     private var LOGGED_IN = "Logged Out"
     lateinit private var saveState: Bundle
+    lateinit var gps: GPSTracker
+    val mAuth = FirebaseAuth.getInstance()
+    lateinit var sharedPreferences: SharedPreferences
+    val MY_PREFS = "MyPrefs"
+    val ACTIVE = "active"
+
 
     // required for callback implementation from Fragments
     override fun onFragmentInteraction(uri: Uri) {
@@ -66,13 +83,32 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         fab.setOnClickListener { view ->
             startActivity(i)
         }
+        sharedPreferences = getSharedPreferences(MY_PREFS, Context.MODE_PRIVATE)
 
         // check if logged in : Launch Login Activity if not
-        if (savedInstanceState == null || !savedInstanceState.getBoolean(LOGGED_IN)) {
+        if (mAuth.currentUser == null){
             startActivity(i)
         } else {
             //TODO: Update the LOGGED_IN text on the UI
             LOGGED_IN = "Logged In"
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.i("Main", "OnStart()")
+
+
+        if (mAuth.currentUser != null) {
+            Log.i("Main", "Firebase User active")
+            if (sharedPreferences.contains(ACTIVE)) {
+                if (!sharedPreferences.getBoolean(ACTIVE, false)){
+                    task { User.activate(mAuth.currentUser!!.uid) } then {
+                        it -> it.addOnCompleteListener {activateLocalUser()}
+                    }
+                }
+            }
+
         }
     }
 
@@ -94,6 +130,47 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onStop() {
+
+        gps = GPSTracker(this.applicationContext)
+        deactivateLocalUser()
+
+        if (gps.isServiceRunning) {
+            gps.stopUsingGPS()
+
+        }
+        this.stopService(Intent(this, GPSTracker::class.java))
+        if (mAuth.currentUser != null) {
+
+            User.deactivate(mAuth.currentUser!!.uid)
+        }
+        super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("Main", "onResume()")
+        gps = GPSTracker(this.applicationContext)
+
+
+        if (!gps.isServiceRunning) {
+            this.startService(Intent(this, GPSTracker::class.java))
+        }
+
+    }
+
+    fun deactivateLocalUser() {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(ACTIVE, false)
+        editor.apply()
+    }
+
+    fun activateLocalUser() {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(ACTIVE, true)
+        editor.apply()
     }
 
 

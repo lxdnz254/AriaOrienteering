@@ -1,5 +1,6 @@
 package com.lxdnz.nz.ariaorienteering.model
 
+import android.location.Location
 import com.google.android.gms.tasks.Task
 import com.lxdnz.nz.ariaorienteering.tasks.UserTask
 import nl.komponents.kovenant.task
@@ -44,11 +45,23 @@ class User {
         }
 
         override fun update(user: User) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            UserTask.updateTask(user)
         }
 
         override fun delete(uid: String?) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun move(location: Location?) {
+            UserTask.moveTask(location)
+        }
+
+        override fun deactivate(uid: String?): Task<User> {
+            return UserTask.deactivateUserTask(uid!!)
+        }
+
+        override fun activate(uid: String?): Task<User> {
+            return UserTask.activateUserTask(uid!!)
         }
     }
 }
@@ -61,4 +74,10 @@ interface UserFactory {
     fun update(user: User)
 
     fun delete(uid: String?)
+
+    fun move(location: Location?)
+
+    fun deactivate(uid: String?): Task<User>
+
+    fun activate(uid: String?): Task<User>
 }

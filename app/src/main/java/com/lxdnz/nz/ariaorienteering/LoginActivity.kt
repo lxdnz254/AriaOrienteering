@@ -1,5 +1,6 @@
 package com.lxdnz.nz.ariaorienteering
 
+import android.app.Activity
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -14,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.ConnectionResult
 import com.google.firebase.auth.FirebaseUser
 import android.content.Intent
+import android.location.Location
 import android.os.PersistableBundle
 import android.support.design.widget.TextInputLayout
 import android.view.inputmethod.InputMethodManager
@@ -21,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.GoogleAuthProvider
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.services.GPSTracker
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 import nl.komponents.kovenant.ui.successUi
@@ -41,6 +44,9 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
 
     private var mAuth: FirebaseAuth? = null
     private var mGoogleApiClient: GoogleApiClient? = null
+
+    lateinit var gps: GPSTracker
+    var location: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +70,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
                 .build()
 
         mAuth = FirebaseAuth.getInstance()
+        getLocation()
     }
 
     override fun onStart() {
@@ -116,7 +123,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
                         Log.e(TAG, "signInWithCredential: Success!")
                         val user = mAuth!!.currentUser
                         // insert a user object here
-                        val activeUser = User.create(user?.uid, user?.email, firstName, 0.0, 0.0 ,true)
+                        val activeUser = User.create(user?.uid, user?.email, firstName, location!!.longitude, location!!.latitude ,true)
                         updateUI(activeUser)
                         // return to main
                         saveState?.putBoolean(LOGGED_IN, true)
@@ -149,16 +156,25 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
     }
 
     private fun doSignIn() {
+        Toast.makeText(this, "Signing In", Toast.LENGTH_LONG).show()
         val intent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
         startActivityForResult(intent, REQUEST_CODE_SIGN_IN)
     }
 
     private fun signOut() {
-        // sign out Firebase
-        mAuth!!.signOut()
-        // sign out Google
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback { updateUI(null) }
-        saveState?.putBoolean(LOGGED_IN, false)
+        // deactivate user
+        Toast.makeText(this, "Signing Out", Toast.LENGTH_LONG).show()
+        val currentUser = mAuth!!.currentUser
+        task { User.deactivate(currentUser?.uid) } then {
+            task -> task.addOnCompleteListener {
+
+                // sign out Firebase
+                mAuth!!.signOut()
+                // sign out Google
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback { updateUI(null) }
+                saveState?.putBoolean(LOGGED_IN, false)
+            }
+        }
     }
 
     private fun revokeAccess() {
@@ -175,7 +191,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
         Log.i(TAG, "Retrieved user:" + user?.firstName)
         if (user != null) {
             tvStatus.text = "User name: " + user.firstName
-            tvDetail.text = "User Logged In: "  + user.active
+            tvDetail.text = "User Active: "  + user.active
 
             firstNameWrapper.visibility = View.GONE
             btn_sign_in.visibility = View.GONE
@@ -197,5 +213,11 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                     .hideSoftInputFromInputMethod(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
         }
+    }
+
+    private fun getLocation() {
+
+        gps = GPSTracker(this.baseContext)
+        location = gps.getUserLocation()
     }
 }

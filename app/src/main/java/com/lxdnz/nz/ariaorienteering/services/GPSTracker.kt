@@ -10,19 +10,24 @@ import android.util.Log
 import android.location.LocationManager
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.provider.Settings
 import android.support.v4.content.ContextCompat.startActivity
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.widget.Toast
+import com.lxdnz.nz.ariaorienteering.model.User
 
 
 class GPSTracker(): Service(), LocationListener {
 
     val TAG: String = "GPSTracker"
+    val MY_PREFS = "MyPrefs"
+    val ACTIVE = "active"
     lateinit var mContext: Context
     var isServiceRunning: Boolean = false
     lateinit var looper: Looper
     lateinit var myServiceHandler: MyServiceHandler
+    lateinit var sPref: SharedPreferences
 
     // flag for GPS status
     var isGPSEnabled = false
@@ -154,6 +159,7 @@ class GPSTracker(): Service(), LocationListener {
         handlerThread.start()
         looper = handlerThread.looper
         myServiceHandler = MyServiceHandler(looper)
+        sPref = getSharedPreferences(MY_PREFS, Context.MODE_PRIVATE)
         isServiceRunning = true
     }
 
@@ -178,8 +184,13 @@ class GPSTracker(): Service(), LocationListener {
        return null
     }
 
-    override fun onLocationChanged(p0: Location?) {
+    override fun onLocationChanged(location: Location?) {
         // here check for Geofences and store new location to Firebase
+        if (::sPref.isInitialized) {
+            if (sPref.contains(ACTIVE) && sPref.getBoolean(ACTIVE, true)) {
+                User.move(location)
+            }
+        }
     }
 
     override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
