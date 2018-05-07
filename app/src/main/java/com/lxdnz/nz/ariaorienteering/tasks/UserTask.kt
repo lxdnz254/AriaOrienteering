@@ -10,16 +10,19 @@ import com.lxdnz.nz.ariaorienteering.model.User
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 
-class UserTask {
+/**
+ * An object class that handles tasks for all User class objects
+ */
 
-    companion object: UserTaskFactory{
+object UserTask {
 
         // connect to firebase
         val db: FirebaseDatabase = FirebaseDatabase.getInstance()
         val mDatabaseReference: DatabaseReference = db.getReference("users")
         val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-        override fun retrieveTask(uid: String): Task<User> {
+
+        fun retrieveTask(uid: String): Task<User> {
             val tcs: TaskCompletionSource<User> = TaskCompletionSource()
 
             mDatabaseReference.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -36,15 +39,15 @@ class UserTask {
             return tcs.task
         }
 
-        override fun createTask(user: User) {
+        fun createTask(user: User) {
             mDatabaseReference.child(user.uid).setValue(user)
         }
 
-        override fun updateTask(user: User) {
+        fun updateTask(user: User) {
             createTask(user)
         }
 
-        override fun moveTask(location: Location?) {
+        fun moveTask(location: Location?) {
             task {
                 retrieveTask(auth.currentUser!!.uid)
             } then {
@@ -57,7 +60,7 @@ class UserTask {
             }
         }
 
-        override fun deactivateUserTask(uid: String): Task<User> {
+        fun deactivateUserTask(uid: String): Task<User> {
             val tcs: TaskCompletionSource<User> = TaskCompletionSource()
             task { User.retrieve(uid) } then { task ->
                 task.addOnCompleteListener { user ->
@@ -78,7 +81,7 @@ class UserTask {
             return tcs.task
         }
 
-        override fun activateUserTask(uid: String): Task<User> {
+        fun activateUserTask(uid: String): Task<User> {
             val tcs: TaskCompletionSource<User> = TaskCompletionSource()
             task { User.retrieve(uid) } then { task ->
                 task.addOnCompleteListener { user ->
@@ -100,19 +103,4 @@ class UserTask {
             }
             return tcs.task
         }
-    }
-}
-
-interface UserTaskFactory {
-    fun retrieveTask(uid: String): Task<User>
-
-    fun createTask(user: User)
-
-    fun updateTask(user: User)
-
-    fun moveTask(location: Location?)
-
-    fun deactivateUserTask(uid: String): Task<User>
-
-    fun activateUserTask(uid: String): Task<User>
 }

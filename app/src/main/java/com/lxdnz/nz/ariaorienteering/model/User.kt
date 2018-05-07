@@ -12,8 +12,10 @@ class User {
             var firstName: String = ""
             var lat: Double = 0.0
             var lon: Double = 0.0
-            //var course_object : Course,
-            //var target : Marker,
+            var course_object: Course? = null
+            var markerList: List<Marker>? = null
+            var foundMarker: List<Marker>? = null
+            var currentTarget: Marker? = null
             var active: Boolean = true
 
     constructor() {

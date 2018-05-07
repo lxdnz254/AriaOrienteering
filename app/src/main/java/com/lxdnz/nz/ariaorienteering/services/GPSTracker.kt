@@ -44,10 +44,11 @@ class GPSTracker(): Service(), LocationListener {
 
     // The minimum distance to change Updates in meters
     private val MIN_DISTANCE_CHANGE_FOR_UPDATES: Float = 3f // 3 meters
+    private val MIN_DISTANCE_CHANGE_FOR_NETWORK_UPDATES: Float = 500f // Network updates 500 meters
 
     // The minimum time between updates in milliseconds
-    private val MIN_TIME_BW_UPDATES = (1000 * 60 * 1).toLong() // 1 minute
-
+    private val MIN_TIME_BW_UPDATES = (1000 * 60 * 0.25).toLong() // 15 seconds
+    private val MIN_TIME_BW_NETWORK_UPDATES = (1000 * 60 * 5).toLong() // 5 minutes
     // Declaring a Location Manager
     protected var locationManager: LocationManager? = null
 
@@ -80,8 +81,8 @@ class GPSTracker(): Service(), LocationListener {
                 if (isNetworkEnabled) {
                     locationManager?.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this)
+                            MIN_TIME_BW_NETWORK_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_NETWORK_UPDATES, this)
                     Log.d("Network", "Network")
                     if (locationManager != null) {
                         location = locationManager!!
@@ -155,7 +156,7 @@ class GPSTracker(): Service(), LocationListener {
 
     override fun onCreate() {
         super.onCreate()
-        val handlerThread: HandlerThread = HandlerThread("MyThread", Process.THREAD_PRIORITY_BACKGROUND)
+        val handlerThread = HandlerThread("MyThread", Process.THREAD_PRIORITY_BACKGROUND)
         handlerThread.start()
         looper = handlerThread.looper
         myServiceHandler = MyServiceHandler(looper)

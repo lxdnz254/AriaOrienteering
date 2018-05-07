@@ -5,13 +5,11 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.support.design.widget.TabLayout
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,18 +17,15 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.fragments.MapFragment
 import com.lxdnz.nz.ariaorienteering.model.User
-import com.lxdnz.nz.ariaorienteering.services.GPSTracker
+import com.lxdnz.nz.ariaorienteering.services.LocationService
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 
@@ -39,7 +34,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
 
     private var LOGGED_IN = "Logged Out"
     lateinit private var saveState: Bundle
-    lateinit var gps: GPSTracker
+    lateinit var locationService: LocationService
     val mAuth = FirebaseAuth.getInstance()
     lateinit var sharedPreferences: SharedPreferences
     val MY_PREFS = "MyPrefs"
@@ -134,14 +129,14 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
 
     override fun onStop() {
 
-        gps = GPSTracker(this.applicationContext)
+        locationService = LocationService(this.applicationContext)
         deactivateLocalUser()
 
-        if (gps.isServiceRunning) {
-            gps.stopUsingGPS()
+        if (locationService.isServiceRunning) {
+            locationService.stop()
 
         }
-        this.stopService(Intent(this, GPSTracker::class.java))
+        this.stopService(Intent(this, LocationService::class.java))
         if (mAuth.currentUser != null) {
 
             User.deactivate(mAuth.currentUser!!.uid)
@@ -152,11 +147,11 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
     override fun onResume() {
         super.onResume()
         Log.i("Main", "onResume()")
-        gps = GPSTracker(this.applicationContext)
+        locationService = LocationService(this.applicationContext)
 
 
-        if (!gps.isServiceRunning) {
-            this.startService(Intent(this, GPSTracker::class.java))
+        if (!locationService.isServiceRunning) {
+            this.startService(Intent(this, LocationService::class.java))
         }
 
     }

@@ -19,14 +19,10 @@ import com.google.android.gms.maps.*
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.lxdnz.nz.ariaorienteering.R
-import com.lxdnz.nz.ariaorienteering.services.GPSTracker
-import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.android.synthetic.main.fragment_map.view.*
+import com.lxdnz.nz.ariaorienteering.services.LocationService
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -53,7 +49,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     val MY_PERMISSIONS_REQUEST_LOCATION = 99
     lateinit var mMapView: MapView
     private lateinit var googleMap: GoogleMap
-    lateinit var gps: GPSTracker
+    lateinit var locationService: LocationService
     lateinit var mContext: Context
     lateinit var activity: Activity
     lateinit var intent: Intent
@@ -68,8 +64,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         activity = this.requireActivity()
         mContext = this.requireContext()
-        gps = GPSTracker(mContext)
-        intent = Intent(activity, GPSTracker::class.java)
+        locationService = LocationService(mContext)
+        intent = Intent(activity, LocationService::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -116,30 +112,38 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 googleMap.uiSettings.isCompassEnabled = true
             }
             // Start the GPS service if it is not running
-            if (!gps.isServiceRunning) {
+            if (!locationService.isServiceRunning) {
                 Log.i(TAG, "Trying Service")
                 activity.startService(intent)
-                gps = GPSTracker(activity)
+                locationService = LocationService(activity)
             }
             else
             {
-                gps = GPSTracker(activity)
+                locationService = LocationService(activity)
             }
 
             // Get current location and add initial marker
-            if (gps.canGetLocation) {
-                val lat = gps.latitude
-                val lon = gps.longitude
+            if (locationService.hasLocation()) {
+                val lat = locationService.getLocation()!!.latitude
+                val lon = locationService.getLocation()!!.longitude
 
                 googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)).title("You are here!")
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)))
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
+            }
+            else if (locationService.hasPossiblyStaleLocation()) {
+                val lat = locationService.getPossiblyStaleLocation()!!.latitude
+                val lon = locationService.getPossiblyStaleLocation()!!.longitude
+
+                googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)).title("You were last known to be here!")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)))
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
             }
             else
             {
                 // can't get location
                 // GPS or Network is disabled
-                gps.showSettingsAlert()
+                locationService.showSettingsAlert()
             }
 
             // add any onClick functions etc
