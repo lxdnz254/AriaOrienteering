@@ -24,6 +24,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.model.User
 import com.lxdnz.nz.ariaorienteering.services.GPSTracker
+import com.lxdnz.nz.ariaorienteering.services.LocationService
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 import nl.komponents.kovenant.ui.successUi
@@ -45,7 +46,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
     private var mAuth: FirebaseAuth? = null
     private var mGoogleApiClient: GoogleApiClient? = null
 
-    lateinit var gps: GPSTracker
+    lateinit var gps: LocationService
     var location: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -217,7 +218,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient
 
     private fun getLocation() {
 
-        gps = GPSTracker(this.baseContext)
-        location = gps.getUserLocation()
+        gps = LocationService(this.baseContext)
+        location = gps.getLocation()
     }
 }

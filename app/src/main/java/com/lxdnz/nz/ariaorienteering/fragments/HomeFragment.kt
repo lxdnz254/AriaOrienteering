@@ -5,11 +5,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 
 import com.lxdnz.nz.ariaorienteering.R
+import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.User
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
@@ -54,6 +57,43 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         home_text.text = getString(R.string.change_home) + ' ' + param2
+        var dX = 0f
+        var dY = 0f
+        var startX = 0f
+        var startY = 0f
+        startActionButton.setOnTouchListener(View.OnTouchListener {v: View, event: MotionEvent ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    dX = v.x - event.rawX
+                    dY = v.y - event.rawY
+                    startX = event.rawX
+                    startY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    v.setY(event.rawY + dY)
+                    v.setX(event.rawX + dX)
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (Math.abs(startX - event.rawX) < 10 && Math.abs(startY - event.rawY)  < 10) {
+                        Toast.makeText(v.context, "Selecting Random Course", Toast.LENGTH_SHORT).show()
+                        selectRandomCourse()
+                    }
+                   true
+                }
+                else -> false
+            }
+        })
+    }
+
+
+    private fun selectRandomCourse() {
+        task { Course.selectRandomCourse() } then { task ->
+            task.addOnCompleteListener { course ->
+                course_selected.text = getString(R.string.select_course) + ' ' + course.result.id
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -63,9 +103,16 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        task {  User.retrieve(FirebaseAuth.getInstance().currentUser?.uid) } then
-                {task -> task.addOnCompleteListener{user ->
-                    home_text.text = getString(R.string.change_home) + ' ' + user.result.firstName } }
+        getCurrentUser()
+    }
+
+    private fun getCurrentUser() {
+        task { User.retrieve(FirebaseAuth.getInstance().currentUser?.uid) } then
+                { task ->
+                    task.addOnCompleteListener { user ->
+                        home_text.text = getString(R.string.change_home) + ' ' + user.result.firstName
+                    }
+                }
     }
 
     override fun onAttach(context: Context) {

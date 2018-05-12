@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.HomeFragment">
 
     <!-- TODO: Update blank fragment layout -->
+
     <TextView
         android:id="@+id/home_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/hello_home_fragment" />
+
+    <TextView
+        android:id="@+id/course_selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/no_course"
+        android:textAlignment="center"
+        tools:text="You have selected Course:" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/startActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30sp"
+        android:layout_marginTop="30sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:src="@android:drawable/star_big_on"
+        app:backgroundTint="@android:color/holo_blue_bright" />
 
 </FrameLayout>

@@ -12,11 +12,9 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
+import com.bluehomestudio.quickoperation.ATButton
 import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
@@ -61,6 +59,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(toolbar)
+        //setUpStartButton()
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
@@ -73,11 +72,38 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
 
         // Login Intent
         val i = Intent(this, LoginActivity::class.java)
-        // Button Listener
 
-        fab.setOnClickListener { view ->
-            startActivity(i)
-        }
+        // Button Touch Listener
+
+        var dX = 0f
+        var dY = 0f
+        var startX = 0f
+        var startY = 0f
+
+        fab.setOnTouchListener(View.OnTouchListener {v: View, event: MotionEvent ->
+            when(event.actionMasked) {
+               MotionEvent.ACTION_DOWN -> {
+                   dX = v.x - event.rawX
+                   dY = v.y - event.rawY
+                   startX = event.rawX
+                   startY = event.rawY
+                   true
+               }
+                MotionEvent.ACTION_MOVE -> {
+                    v.setY(event.rawY + dY)
+                    v.setX(event.rawX + dX)
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (Math.abs(startX - event.rawX) < 10 && Math.abs(startY - event.rawY) < 10) {
+                        Toast.makeText(this, "Clicked!", Toast.LENGTH_SHORT).show()
+                        startActivity(i)
+                    }
+                    true
+                }
+                else -> false
+            }
+        })
         sharedPreferences = getSharedPreferences(MY_PREFS, Context.MODE_PRIVATE)
 
         // check if logged in : Launch Login Activity if not
@@ -92,14 +118,20 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
     override fun onStart() {
         super.onStart()
         Log.i("Main", "OnStart()")
+        checkAuthorisedUser()
+    }
 
+    private fun setUpStartButton() {
+        //TODO implement startButton activities
+    }
 
+    private fun checkAuthorisedUser() {
         if (mAuth.currentUser != null) {
             Log.i("Main", "Firebase User active")
             if (sharedPreferences.contains(ACTIVE)) {
-                if (!sharedPreferences.getBoolean(ACTIVE, false)){
-                    task { User.activate(mAuth.currentUser!!.uid) } then {
-                        it -> it.addOnCompleteListener {activateLocalUser()}
+                if (!sharedPreferences.getBoolean(ACTIVE, false)) {
+                    task { User.activate(mAuth.currentUser!!.uid) } then { it ->
+                        it.addOnCompleteListener { activateLocalUser() }
                     }
                 }
             }

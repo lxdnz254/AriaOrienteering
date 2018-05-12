@@ -1,5 +1,6 @@
 package com.lxdnz.nz.ariaorienteering.model
 
+import com.google.android.gms.tasks.Task
 import com.lxdnz.nz.ariaorienteering.tasks.CourseTask
 import nl.komponents.kovenant.task
 
@@ -22,23 +23,23 @@ class Course {
             return CourseTask.createTask(Course(id, year, markers)).result
         }
 
-        override fun retrieve(id: String): Course {
-            return CourseTask.retrieveTask(id).result
+        override fun retrieve(id: String): Task<Course> {
+            return CourseTask.retrieveTask(id)
         }
 
         override fun retrieveAll(): List<Course?> {
             return CourseTask.retrieveAllTask().result
         }
 
-        override fun selectRandomCourse(): Course {
-            return CourseTask.selectRandomCourseTask().result
+        override fun selectRandomCourse(): Task<Course> {
+            return CourseTask.selectRandomCourseTask()
         }
     }
 }
 
 interface CourseFactory {
     fun create(id: String, year: Int, markers: MutableList<Int>): Course
-    fun retrieve(id: String): Course
+    fun retrieve(id: String): Task<Course>
     fun retrieveAll(): List<Course?>
-    fun selectRandomCourse(): Course
+    fun selectRandomCourse(): Task<Course>
 }

@@ -32,4 +32,6 @@
     <string name="hello_map_fragment">This is the Map Fragment</string>
     <string name="hello_help_fragment">Hello User who needs help</string>
     <string name="change_home">Hey you\'ve changed the home page!</string>
+    <string name="select_course">The course selected for you is:</string>
+    <string name="no_course">No Course selected yet</string>
 </resources>
