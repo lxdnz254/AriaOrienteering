@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.User
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
@@ -56,6 +57,18 @@ object UserTask {
                     moveUser.lon = location!!.longitude
                     moveUser.lat = location.latitude
                     updateTask(moveUser)
+                }
+            }
+        }
+
+        fun addCourseTask(course: Course?) {
+            task {
+                retrieveTask(auth.currentUser!!.uid)
+            } then {
+                task -> task.addOnCompleteListener {
+                    user -> val courseUser = user.result
+                    courseUser.course_object = course!!
+                    updateTask(courseUser)
                 }
             }
         }

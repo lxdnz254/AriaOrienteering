@@ -92,6 +92,7 @@ class HomeFragment : Fragment() {
         task { Course.selectRandomCourse() } then { task ->
             task.addOnCompleteListener { course ->
                 course_selected.text = getString(R.string.select_course) + ' ' + course.result.id
+                User.addCourse(course.result)
             }
         }
     }
@@ -111,6 +112,9 @@ class HomeFragment : Fragment() {
                 { task ->
                     task.addOnCompleteListener { user ->
                         home_text.text = getString(R.string.change_home) + ' ' + user.result.firstName
+                        if (user.result.course_object != null) {
+                            course_selected.text = getString(R.string.select_course) + ' ' + user.result.course_object!!.id
+                        }
                     }
                 }
     }

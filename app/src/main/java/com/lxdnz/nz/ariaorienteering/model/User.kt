@@ -65,6 +65,10 @@ class User {
         override fun activate(uid: String?): Task<User> {
             return UserTask.activateUserTask(uid!!)
         }
+
+        override fun addCourse(course: Course?) {
+            UserTask.addCourseTask(course!!)
+        }
     }
 }
 
@@ -82,4 +86,6 @@ interface UserFactory {
     fun deactivate(uid: String?): Task<User>
 
     fun activate(uid: String?): Task<User>
+
+    fun addCourse(course: Course?)
 }

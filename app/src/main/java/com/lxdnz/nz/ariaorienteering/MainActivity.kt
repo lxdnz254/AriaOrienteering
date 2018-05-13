@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import com.bluehomestudio.quickoperation.ATButton
 import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
@@ -129,16 +128,22 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         if (mAuth.currentUser != null) {
             Log.i("Main", "Firebase User active")
             if (sharedPreferences.contains(ACTIVE)) {
-                if (!sharedPreferences.getBoolean(ACTIVE, false)) {
+                if (sharedPreferences.getBoolean(ACTIVE, false)) {
                     task { User.activate(mAuth.currentUser!!.uid) } then { it ->
                         it.addOnCompleteListener { activateLocalUser() }
+                    }
+                } else {
+                    task { User.retrieve(mAuth.currentUser!!.uid) } then { it ->
+                        it.addOnCompleteListener { user -> if (!user.result.active) {
+                            Log.i("Main", "Adjusting user active")
+                            User.activate(user.result.uid)}
+                        }
                     }
                 }
             }
 
         }
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
