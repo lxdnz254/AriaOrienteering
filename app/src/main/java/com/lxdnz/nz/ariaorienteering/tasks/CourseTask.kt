@@ -27,7 +27,7 @@ object CourseTask {
     fun retrieveTask(id: String): Task<Course> {
         val tcs: TaskCompletionSource<Course> = TaskCompletionSource()
 
-        CourseTask.mDatabaseReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener {
+        mDatabaseReference.child(id).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError?) {
 
             }
@@ -45,7 +45,7 @@ object CourseTask {
     fun retrieveAllTask(): Task<List<Course?>> {
         val tcs: TaskCompletionSource<List<Course?>> = TaskCompletionSource()
 
-        CourseTask.mDatabaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+        mDatabaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError?) {
 
             }

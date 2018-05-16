@@ -1,6 +1,5 @@
-package com.lxdnz.nz.ariaorienteering
+package com.lxdnz.nz.ariaorienteering.dialogs
 
-import android.app.Activity
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -13,27 +12,24 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.ConnectionResult
-import com.google.firebase.auth.FirebaseUser
 import android.content.Intent
 import android.location.Location
-import android.os.PersistableBundle
 import android.support.design.widget.TextInputLayout
 import android.view.inputmethod.InputMethodManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.GoogleAuthProvider
-import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
+import com.lxdnz.nz.ariaorienteering.BuildConfig
+import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.User
-import com.lxdnz.nz.ariaorienteering.services.GPSTracker
 import com.lxdnz.nz.ariaorienteering.services.LocationService
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
-import nl.komponents.kovenant.ui.successUi
 
 
 /**
  * A login screen that offers login via email/password to Firebase.
  */
-class LoginActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
+class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
     private val TAG = "FirebaseGoogleSignIn"
     private val LOGGED_IN = "LOGGED_IN"

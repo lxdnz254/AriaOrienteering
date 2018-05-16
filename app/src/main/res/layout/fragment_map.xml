@@ -7,9 +7,18 @@
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
 
-        class="com.google.android.gms.maps.SupportMapFragment"/>
+        android:layout_height="fill_parent"
+        tools:visibility="gone" />
+
+    <Button
+        android:id="@+id/adminMarker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_marker"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
 
 </FrameLayout>

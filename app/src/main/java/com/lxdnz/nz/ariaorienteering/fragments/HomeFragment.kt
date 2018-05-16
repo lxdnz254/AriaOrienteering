@@ -1,8 +1,11 @@
 package com.lxdnz.nz.ariaorienteering.fragments
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.support.annotation.Nullable
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -14,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
@@ -44,6 +48,21 @@ class HomeFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
+        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userLiveData = userViewModel.getLiveUserData()
+        userLiveData.observe(this, Observer { user: User? ->
+            if (user != null) {
+                updateUI(user)
+            }
+        })
+    }
+
+    fun updateUI(user: User) {
+        home_text.text = getString(R.string.change_home) + ' ' + user.firstName
+        if (user.course_object != null) {
+            course_selected.text = getString(R.string.select_course) + ' ' + user.course_object!!.id
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -56,7 +75,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        home_text.text = getString(R.string.change_home) + ' ' + param2
+
         var dX = 0f
         var dY = 0f
         var startX = 0f
@@ -91,7 +110,6 @@ class HomeFragment : Fragment() {
     private fun selectRandomCourse() {
         task { Course.selectRandomCourse() } then { task ->
             task.addOnCompleteListener { course ->
-                course_selected.text = getString(R.string.select_course) + ' ' + course.result.id
                 User.addCourse(course.result)
             }
         }
@@ -108,15 +126,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun getCurrentUser() {
-        task { User.retrieve(FirebaseAuth.getInstance().currentUser?.uid) } then
-                { task ->
-                    task.addOnCompleteListener { user ->
-                        home_text.text = getString(R.string.change_home) + ' ' + user.result.firstName
-                        if (user.result.course_object != null) {
-                            course_selected.text = getString(R.string.select_course) + ' ' + user.result.course_object!!.id
-                        }
-                    }
-                }
+        User.retrieve(FirebaseAuth.getInstance().currentUser?.uid)
     }
 
     override fun onAttach(context: Context) {

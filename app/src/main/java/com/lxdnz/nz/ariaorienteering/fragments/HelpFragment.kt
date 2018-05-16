@@ -1,5 +1,7 @@
 package com.lxdnz.nz.ariaorienteering.fragments
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -9,6 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.lxdnz.nz.ariaorienteering.R
+import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
+import kotlinx.android.synthetic.main.fragment_help.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,12 +41,24 @@ class HelpFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userLiveData = userViewModel.getLiveUserData()
+        userLiveData.observe(this, Observer { user: User? ->
+            if (user != null) {
+                UpdateUI(user)
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_help, container, false)
+    }
+
+    private fun UpdateUI(user: User) {
+        help_text.text = "Hello " + user.firstName + "! Do you need help with course " + user.course_object?.id + "?"
     }
 
     // TODO: Rename method, update argument and hook method into UI event

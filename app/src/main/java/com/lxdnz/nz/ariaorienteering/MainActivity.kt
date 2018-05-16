@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.*
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.lxdnz.nz.ariaorienteering.dialogs.LoginDialogActivity
 import com.lxdnz.nz.ariaorienteering.fragments.HelpFragment
 import com.lxdnz.nz.ariaorienteering.fragments.HomeFragment
 import com.lxdnz.nz.ariaorienteering.fragments.MapFragment
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
         // Login Intent
-        val i = Intent(this, LoginActivity::class.java)
+        val i = Intent(this, LoginDialogActivity::class.java)
 
         // Button Touch Listener
 

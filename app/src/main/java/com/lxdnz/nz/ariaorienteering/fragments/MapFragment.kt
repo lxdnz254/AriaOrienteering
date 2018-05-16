@@ -2,6 +2,8 @@ package com.lxdnz.nz.ariaorienteering.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,6 +17,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.google.android.gms.maps.*
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -22,8 +25,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.lxdnz.nz.ariaorienteering.R
+import com.lxdnz.nz.ariaorienteering.dialogs.AddMarkerDialog
+import com.lxdnz.nz.ariaorienteering.model.User
 import com.lxdnz.nz.ariaorienteering.services.LocationService
+import com.lxdnz.nz.ariaorienteering.tasks.AdminTask
 
+import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
+import kotlinx.android.synthetic.main.fragment_map.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,6 +52,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var param1: String? = null
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
+    private var activeUser: User? = null
 
     val TAG:String = "MapFragment"
     val MY_PERMISSIONS_REQUEST_LOCATION = 99
@@ -66,6 +75,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mContext = this.requireContext()
         locationService = LocationService(mContext)
         intent = Intent(activity, LocationService::class.java)
+
+        /**
+         * Keep track of the current user with the View Model and update UI accordingly
+         */
+        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userLiveData = userViewModel.getLiveUserData()
+        userLiveData.observe(this, Observer { user: User? ->
+            if (user != null) {
+                adminUpdateUI(user)
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -90,13 +110,35 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return rootView
     }
 
+    /**
+     * Updates the UI, if ADMIN then set add marker option, else move to refresh/add course markers to map
+     */
+    private fun adminUpdateUI(user: User) {
+        adminMarker.visibility = View.GONE
+
+        AdminTask.checkAdmin(user.firstName).addOnCompleteListener { task ->
+            if (task.result) {
+                Toast.makeText(mContext, "Logged as admin", Toast.LENGTH_SHORT).show()
+                // show add marker button and set on click
+                adminMarker.visibility = View.VISIBLE
+                adminMarker.setOnClickListener(View.OnClickListener { it -> addMarker() })
+                // add adminOnMarkerClick to remove marker
+
+            } else {
+                // do this if not admin - add onMarkerClick - Target Marker
+               refreshMarkers(user)
+            }
+        }
+
+    }
+
     private fun setUpMap() {
         try {
             Log.i(TAG, "trying to make Map")
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                    googleMap!!.isMyLocationEnabled = true
+                    googleMap.isMyLocationEnabled = true
                     googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
                     googleMap.uiSettings.isZoomControlsEnabled = true
                     googleMap.uiSettings.isCompassEnabled = true
@@ -106,7 +148,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             MY_PERMISSIONS_REQUEST_LOCATION)
                 }
             } else {
-                googleMap!!.isMyLocationEnabled = true
+                googleMap.isMyLocationEnabled = true
                 googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
                 googleMap.uiSettings.isZoomControlsEnabled = true
                 googleMap.uiSettings.isCompassEnabled = true
@@ -146,12 +188,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 locationService.showSettingsAlert()
             }
 
-            // add any onClick functions etc
-
         } catch (se: SecurityException) {
             // dialog for activating locations here
             Log.i(TAG, "Security Error")
         }
+
+    }
+
+    /**
+     * Admin Adds a marker to the map
+     */
+    private fun addMarker() {
+        val markerDialog = AddMarkerDialog()
+        markerDialog.show(fragmentManager, "AddMarkerDialog")
+    }
+
+    /**
+     * Standard User has course markers displayed (if they are on a current course)
+     */
+    private fun refreshMarkers(user: User) {
+        Log.i(TAG, "refreshing Markers")
+        // TODO: Download Markers for course and add to map, set Geo-fences up
+        // add any onClick functions etc
 
     }
 
@@ -164,6 +222,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener) {
             listener = context
+            Log.i(TAG, "Map onAttach")
         } else {
             throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
         }
@@ -171,6 +230,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         mMapView.onResume()
+        Log.i(TAG, "Map onResume")
         super.onResume()
     }
 
@@ -182,10 +242,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onLowMemory() {
         super.onLowMemory()
         mMapView.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
     override fun onDetach() {

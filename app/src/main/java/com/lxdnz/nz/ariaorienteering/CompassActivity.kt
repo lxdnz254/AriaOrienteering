@@ -22,6 +22,7 @@ import android.support.v4.app.ActivityCompat
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import com.lxdnz.nz.ariaorienteering.dialogs.LoginDialogActivity
 
 /**
  * Created by alex on 4/03/18.
@@ -150,12 +151,12 @@ class CompassActivity : Activity(), SensorEventListener, LocationListener, View.
     }
 
     private fun callDisconnect() {
-        var i = Intent(this, LoginActivity::class.java)
+        var i = Intent(this, LoginDialogActivity::class.java)
         startActivity(i)
     }
 
     private fun callSignOut() {
-        val i = Intent(this, LoginActivity::class.java)
+        val i = Intent(this, LoginDialogActivity::class.java)
         startActivity(i)
     }
 

@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LoginActivity"
+            android:name=".dialogs.LoginDialogActivity"
             android:label="@string/title_text"
             android:theme="@style/AppDialogTheme"
             android:excludeFromRecents="true">
@@ -41,6 +41,7 @@
 
         <service android:name=".services.GPSTracker" />
         <service android:name=".services.LocationService" />
+        <service android:name=".services.GeofenceTransitionService" />
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value = "@string/google_map_api_key"/>
     </application>
