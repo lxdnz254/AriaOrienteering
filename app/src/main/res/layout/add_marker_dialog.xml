@@ -7,39 +7,39 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:weightSum="3">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <EditText
             android:id="@+id/editMarkerNumber"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:ems="10"
             android:hint="Marker Number"
             android:inputType="number"
-            android:layout_weight="1"
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="67dp" />
 
         <Spinner
             android:id="@+id/imageTypeSpinner"
-            android:layout_width="336dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Image Type"
-            android:layout_below="@id/editMarkerNumber"
             tools:layout_editor_absoluteX="16dp"
             tools:layout_editor_absoluteY="138dp" />
 
-        <MultiAutoCompleteTextView
-            android:id="@+id/multiCourseSelectorView"
-            android:layout_width="wrap_content"
+        <GridView
+            android:id="@+id/course_grid_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/select_course"
-            android:layout_below="@id/imageTypeSpinner"
-            android:text="Courses"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="173dp" />
+            android:numColumns="4"
+            android:padding="1dp"
+            android:layout_weight="1" />
+
+
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

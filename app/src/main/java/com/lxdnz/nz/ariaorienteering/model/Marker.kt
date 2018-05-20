@@ -2,6 +2,7 @@ package com.lxdnz.nz.ariaorienteering.model
 
 import com.google.android.gms.tasks.Task
 import com.lxdnz.nz.ariaorienteering.model.types.ImageType
+import com.lxdnz.nz.ariaorienteering.tasks.MarkerTask
 
 class Marker {
     var id = 0
@@ -22,8 +23,7 @@ class Marker {
         override fun create(id: Int, imageType: ImageType, lat: Double, lon: Double): Marker {
             val marker = Marker (id, imageType, lat, lon)
             // Do Marker add to DB task
-
-            return marker
+            return MarkerTask.createTask(marker).result
         }
 
         override fun retrieve(id: Int): Task<Marker> {

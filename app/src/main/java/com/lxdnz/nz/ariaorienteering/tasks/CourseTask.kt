@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.lxdnz.nz.ariaorienteering.model.Course
+import com.lxdnz.nz.ariaorienteering.model.Marker
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 import java.util.*
@@ -79,5 +80,17 @@ object CourseTask {
         }
 
         return tcs.task
+    }
+
+    fun addMarker(courseId: String, marker: Marker) {
+        task {
+            retrieveTask(courseId)
+        } then {
+            task -> task.addOnCompleteListener {
+                res -> val updateCourse = res.result
+                updateCourse.markers.add(marker)
+                createTask(updateCourse)
+            }
+        }
     }
 }
