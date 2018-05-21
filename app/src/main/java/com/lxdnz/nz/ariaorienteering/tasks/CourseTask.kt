@@ -57,7 +57,6 @@ object CourseTask {
                     val course = courseSnapshot.getValue(Course::class.java)
                     courses.add(course)
                 }
-
                 tcs.setResult(courses)
             }
         })
@@ -82,13 +81,33 @@ object CourseTask {
         return tcs.task
     }
 
+    /**
+     * Add or Update a marker in to the course markers List.
+     *
+     * @param courseId: String matching the ID of the course to be updated.
+     * @param marker: The marker object being added/updated to the course markers list.
+     */
     fun addMarker(courseId: String, marker: Marker) {
+
+        // Internal function must be placed before the call
+        fun updateMarkerList(course: Course) {
+            val findMarker = course.markers.find { it -> it.id == marker.id }
+            if(findMarker != null){
+                val index = course.markers.indexOf(findMarker)
+                course.markers.removeAt(index)
+                course.markers.add(index, marker)
+            } else {
+                course.markers.add(marker)
+            }
+        }
+
+        // Task to update course in Firebase
         task {
             retrieveTask(courseId)
         } then {
             task -> task.addOnCompleteListener {
                 res -> val updateCourse = res.result
-                updateCourse.markers.add(marker)
+                updateMarkerList(updateCourse)
                 createTask(updateCourse)
             }
         }

@@ -10,8 +10,9 @@ import android.widget.CheckBox
 
 import com.lxdnz.nz.ariaorienteering.R
 
-
-
+/**
+ * Adapter for the displaying a Checkbox in a view
+ */
 class CourseAdapter(private val mContext: Context, val courseArray: Array<String>, val booleanArray: BooleanArray) : BaseAdapter() {
 
     val TAG = "Course Adapter"
