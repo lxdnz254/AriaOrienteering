@@ -18,20 +18,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.google.android.gms.maps.*
 
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.maps.android.clustering.ClusterManager
 
 import com.lxdnz.nz.ariaorienteering.R
+import com.lxdnz.nz.ariaorienteering.customisers.CustomClusterRenderer
+import com.lxdnz.nz.ariaorienteering.customisers.StringClusterItem
 import com.lxdnz.nz.ariaorienteering.dialogs.AddMarkerDialog
+import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import com.lxdnz.nz.ariaorienteering.services.LocationService
 import com.lxdnz.nz.ariaorienteering.tasks.AdminTask
-
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
+
 import kotlinx.android.synthetic.main.fragment_map.*
+import nl.komponents.kovenant.task
+import nl.komponents.kovenant.then
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,9 +61,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var param1: String? = null
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
-    private var activeUser: User? = null
 
-    val TAG:String = "MapFragment"
+    val TAG: String = "MapFragment"
     val MY_PERMISSIONS_REQUEST_LOCATION = 99
     lateinit var mMapView: MapView
     private lateinit var googleMap: GoogleMap
@@ -62,6 +70,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     lateinit var mContext: Context
     lateinit var activity: Activity
     lateinit var intent: Intent
+    lateinit var mClusterManager1: ClusterManager<StringClusterItem>
+    lateinit var mClusterManager2: ClusterManager<StringClusterItem>
+    lateinit var mClusterManager3: ClusterManager<StringClusterItem>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +90,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         /**
          * Keep track of the current user with the View Model and update UI accordingly
          */
-        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userViewModel: UserViewModel = ViewModelProviders
+                .of(this)
+                .get(UserViewModel::class.java)
         val userLiveData = userViewModel.getLiveUserData()
         userLiveData.observe(this, Observer { user: User? ->
             if (user != null) {
@@ -91,7 +104,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val rootView =  inflater.inflate(R.layout.fragment_map, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_map, container, false)
 
         val sMapFragment = SupportMapFragment.newInstance()
         mMapView = rootView.findViewById(R.id.mapView) as MapView
@@ -126,10 +139,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
             } else {
                 // do this if not admin - add onMarkerClick - Target Marker
-               refreshMarkers(user)
+                if (user.courseObject != null)
+                    refreshMarkers(user)
             }
         }
 
+    }
+
+    /**
+     * Admin Adds a marker to the map
+     */
+    private fun addMarker() {
+        val markerDialog = AddMarkerDialog()
+        markerDialog.show(fragmentManager, "AddMarkerDialog")
     }
 
     private fun setUpMap() {
@@ -158,9 +180,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 Log.i(TAG, "Trying Service")
                 activity.startService(intent)
                 locationService = LocationService(activity)
-            }
-            else
-            {
+            } else {
                 locationService = LocationService(activity)
             }
 
@@ -169,24 +189,33 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 val lat = locationService.getLocation()!!.latitude
                 val lon = locationService.getLocation()!!.longitude
 
-                googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)).title("You are here!")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)))
+                googleMap.addMarker(MarkerOptions()
+                        .position(LatLng(lat, lon))
+                        .title("You are here!")
+                        .icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)))
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
-            }
-            else if (locationService.hasPossiblyStaleLocation()) {
+            } else if (locationService.hasPossiblyStaleLocation()) {
                 val lat = locationService.getPossiblyStaleLocation()!!.latitude
                 val lon = locationService.getPossiblyStaleLocation()!!.longitude
 
-                googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)).title("You were last known to be here!")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)))
+                googleMap.addMarker(MarkerOptions()
+                        .position(LatLng(lat, lon))
+                        .title("You were last known to be here!")
+                        .icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)))
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
-            }
-            else
-            {
+            } else {
                 // can't get location
                 // GPS or Network is disabled
                 locationService.showSettingsAlert()
             }
+            mClusterManager1 = ClusterManager(mContext, googleMap)
+            mClusterManager2 = ClusterManager(mContext, googleMap)
+            mClusterManager3 = ClusterManager(mContext, googleMap)
+            setClusterManger(mClusterManager1, MarkerStatus.NOT_FOUND)
+            setClusterManger(mClusterManager2, MarkerStatus.FOUND)
+            setClusterManger(mClusterManager3, MarkerStatus.TARGET)
 
         } catch (se: SecurityException) {
             // dialog for activating locations here
@@ -196,21 +225,66 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     /**
-     * Admin Adds a marker to the map
+     * Sets up Cluster Managers
+     * Note - we could add functionality here with extra CustomisedCluster Renderers
      */
-    private fun addMarker() {
-        val markerDialog = AddMarkerDialog()
-        markerDialog.show(fragmentManager, "AddMarkerDialog")
+    private fun setClusterManger(clusterManager: ClusterManager<StringClusterItem>,
+                                 status: MarkerStatus) {
+        googleMap.setOnCameraChangeListener(clusterManager)
+        val renderer = CustomClusterRenderer(mContext, googleMap, clusterManager, status)
+        clusterManager.setRenderer(renderer)
     }
 
     /**
      * Standard User has course markers displayed (if they are on a current course)
      */
     private fun refreshMarkers(user: User) {
-        Log.i(TAG, "refreshing Markers")
-        // TODO: Download Markers for course and add to map, set Geo-fences up
-        // add any onClick functions etc
 
+        Log.i(TAG, "refreshing Markers")
+        // TODO: add onClick function to target Marker
+
+        val courseMarkers = user.courseObject!!.markers
+
+        val notFoundMarkers = mutableListOf<Marker>()
+        val foundMarkers = mutableListOf<Marker>()
+        val targetMarker = mutableListOf<Marker>()
+
+        courseMarkers.forEach({ marker ->
+
+            if (marker.status.equals(MarkerStatus.NOT_FOUND)) {
+                notFoundMarkers.add(marker)
+            } else if (marker.status.equals(MarkerStatus.FOUND)) {
+                foundMarkers.add(marker)
+            } else if (marker.status.equals(MarkerStatus.TARGET)) {
+                targetMarker.add(marker)
+            }
+        })
+
+        clusterManagement(mClusterManager1, notFoundMarkers)
+        clusterManagement(mClusterManager2, foundMarkers)
+        clusterManagement(mClusterManager3, targetMarker)
+
+    }
+
+
+    /**
+     * private function to manage many clusters
+     */
+    private fun clusterManagement(mClusterManager: ClusterManager<StringClusterItem>,
+                                  markerList: MutableList<Marker>) {
+        //remove the markers
+        mClusterManager.markerCollection.markers.forEach({marker -> marker.remove()})
+        mClusterManager.clearItems()
+        // add to cluster if markers exist in list
+        if (markerList.isNotEmpty()) {
+            markerList.forEach({ marker ->
+                mClusterManager
+                        .addItem(StringClusterItem(marker.id.toString(),
+                                LatLng(marker.lat, marker.lon)))
+            })
+        }
+        // cluster to map
+        mClusterManager.cluster()
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -290,4 +364,5 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     }
                 }
     }
+
 }

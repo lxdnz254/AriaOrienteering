@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.support.annotation.Nullable
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -17,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.tasks.GeofenceTask
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
@@ -60,8 +60,8 @@ class HomeFragment : Fragment() {
 
     fun updateUI(user: User) {
         home_text.text = getString(R.string.change_home) + ' ' + user.firstName
-        if (user.course_object != null) {
-            course_selected.text = getString(R.string.select_course) + ' ' + user.course_object!!.id
+        if (user.courseObject != null) {
+            course_selected.text = getString(R.string.select_course) + ' ' + user.courseObject!!.id
         }
     }
 
@@ -107,12 +107,23 @@ class HomeFragment : Fragment() {
     }
 
 
+
+
     private fun selectRandomCourse() {
         task { Course.selectRandomCourse() } then { task ->
             task.addOnCompleteListener { course ->
                 User.addCourse(course.result)
+                startRandomCourse(course.result)
             }
         }
+    }
+
+    private fun startRandomCourse(course: Course) {
+
+        // geofence markers
+        course.markers.forEach({marker -> GeofenceTask.addGeofence(marker)})
+
+        //start timer
     }
 
     // TODO: Rename method, update argument and hook method into UI event

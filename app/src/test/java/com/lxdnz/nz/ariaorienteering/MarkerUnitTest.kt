@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.types.ImageType
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith;
@@ -56,11 +57,13 @@ class MarkerUnitTest {
         val type = result.imageType
         val lon = result.lon
         val lat = result.lat
+        val status = result.status
 
         assertEquals("Marker Id are equal", 1, id)
         assertEquals("Marker type equal", ImageType.DEFAULT, type)
         assertTrue("Marker longitude equal", lon == 0.0)
         assertTrue("Marker latitude equal", lat == 0.0)
+        assertEquals("Marker Status", MarkerStatus.NOT_FOUND, status)
     }
 
     @Test
@@ -71,11 +74,13 @@ class MarkerUnitTest {
         val type = m.imageType
         val lon = m.lon
         val lat = m.lat
+        val status = m.status
 
         assertEquals("Marker Id are equal", 1, id)
         assertEquals("Marker type equal", ImageType.DEFAULT, type)
         assertTrue("Marker longitude equal", lon == 0.0)
         assertTrue("Marker latitude equal", lat == 0.0)
+        assertEquals("Marker Status", MarkerStatus.NOT_FOUND, status)
     }
 
 }

@@ -1,11 +1,11 @@
 package com.lxdnz.nz.ariaorienteering.tasks
 
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.lxdnz.nz.ariaorienteering.model.Marker
 
 object MarkerTask {
@@ -22,8 +22,22 @@ object MarkerTask {
         return tcs.task
     }
 
-    fun retrieveTask() {
+    fun retrieveTask(id: Int): Task<Marker>{
+        val tcs: TaskCompletionSource<Marker> = TaskCompletionSource()
 
+        mDatabaseReference.child(id.toString()).addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError?) {
+
+            }
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val marker = snapshot.getValue(Marker::class.java)
+                Log.i("onDataChange", marker?.id.toString() + ":" + marker!!.imageType)
+                tcs.setResult(marker)
+            }
+        })
+
+        return tcs.task
     }
 
     fun updateTask() {
@@ -31,6 +45,10 @@ object MarkerTask {
     }
 
     fun deleteTask() {
+
+    }
+
+    fun addMarker(marker: Marker) {
 
     }
 }

@@ -2,6 +2,7 @@ package com.lxdnz.nz.ariaorienteering.model
 
 import com.google.android.gms.tasks.Task
 import com.lxdnz.nz.ariaorienteering.model.types.ImageType
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import com.lxdnz.nz.ariaorienteering.tasks.MarkerTask
 
 class Marker {
@@ -9,6 +10,7 @@ class Marker {
     var imageType = ImageType.DEFAULT
     var lat = 0.0
     var lon = 0.0
+    var status = MarkerStatus.NOT_FOUND
 
     constructor() // default constructor for Firebase
 
@@ -27,7 +29,7 @@ class Marker {
         }
 
         override fun retrieve(id: Int): Task<Marker> {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            return MarkerTask.retrieveTask(id)
         }
 
         override fun update(marker: Marker) {

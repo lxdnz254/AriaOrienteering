@@ -24,6 +24,8 @@ object AdminTask {
                 val admin = snapshot.getValue(String::class.java)
                 if (name.equals(admin)){
                     tcs.setResult(true)
+                }else {
+                    tcs.setResult(false)
                 }
             }
 

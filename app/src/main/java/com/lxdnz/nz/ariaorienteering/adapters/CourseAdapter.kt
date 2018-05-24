@@ -13,13 +13,20 @@ import com.lxdnz.nz.ariaorienteering.R
 /**
  * Adapter for the displaying a Checkbox in a view
  */
-class CourseAdapter(private val mContext: Context, val courseArray: Array<String>, val booleanArray: BooleanArray) : BaseAdapter() {
+class CourseAdapter(private val mContext: Context,
+                    val courseArray: Array<String>,
+                    val booleanArray: BooleanArray) : BaseAdapter() {
 
     val TAG = "Course Adapter"
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val inflater: LayoutInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    override fun getView(position: Int,
+                         convertView: View?,
+                         parent: ViewGroup?): View {
+
+        val inflater: LayoutInflater =
+                mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val gridView: View
+
         if (convertView == null){
             gridView = inflater.inflate(R.layout.course_adapter, null)
             val checkBox: CheckBox = gridView.findViewById(R.id.course_checkBox)

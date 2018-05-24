@@ -2,6 +2,7 @@ package com.lxdnz.nz.ariaorienteering.model
 
 import android.location.Location
 import com.google.android.gms.tasks.Task
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import com.lxdnz.nz.ariaorienteering.tasks.UserTask
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
@@ -12,10 +13,7 @@ class User {
             var firstName: String = ""
             var lat: Double = 0.0
             var lon: Double = 0.0
-            var course_object: Course? = null
-            var markerList: List<Marker>? = null
-            var foundMarker: List<Marker>? = null
-            var currentTarget: Marker? = null
+            var courseObject: Course? = null
             var active: Boolean = true
 
     constructor() {
@@ -69,6 +67,15 @@ class User {
         override fun addCourse(course: Course?) {
             UserTask.addCourseTask(course!!)
         }
+
+        override fun targetMarker(marker: Marker) {
+            UserTask.targetMarker(marker)
+        }
+
+        override fun findMarker(marker: Marker) {
+            UserTask.findMarkerTask(marker)
+        }
+
     }
 }
 
@@ -88,4 +95,8 @@ interface UserFactory {
     fun activate(uid: String?): Task<User>
 
     fun addCourse(course: Course?)
+
+    fun targetMarker(marker: Marker)
+
+    fun findMarker(marker: Marker)
 }

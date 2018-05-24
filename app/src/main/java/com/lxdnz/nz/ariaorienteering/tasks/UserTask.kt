@@ -7,7 +7,9 @@ import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.lxdnz.nz.ariaorienteering.model.Course
+import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 
@@ -67,7 +69,9 @@ object UserTask {
             } then {
                 task -> task.addOnCompleteListener {
                     user -> val courseUser = user.result
-                    courseUser.course_object = course!!
+                    courseUser.courseObject = course!!
+                    course.markers.forEach({marker ->
+                        marker.status = MarkerStatus.NOT_FOUND})
                     updateTask(courseUser)
                 }
             }
@@ -116,4 +120,49 @@ object UserTask {
             }
             return tcs.task
         }
+
+    fun findMarkerTask(marker: Marker) {
+        // write the inner function / implementation code
+        fun updateMarker(updateMarker: Marker, course: Course?) {
+
+            val findMarker = course!!.markers.find { it -> it.id == updateMarker.id }
+            if(findMarker != null){
+                val index = course.markers.indexOf(findMarker)
+                course.markers.removeAt(index)
+                updateMarker.status = MarkerStatus.FOUND
+                course.markers.add(index, updateMarker)
+            }
+        }
+
+        task { retrieveTask(auth.currentUser!!.uid)} then {
+            task -> task.addOnCompleteListener {
+                user -> val findUser = user.result
+                updateMarker(marker, findUser.courseObject)
+                updateTask(findUser)
+            }
+        }
+    }
+
+    fun targetMarker(marker: Marker) {
+        // write the inner function / implementation code
+        fun updateMarker(updateMarker: Marker, course: Course?) {
+
+            val findMarker = course!!.markers.find { it -> it.id == updateMarker.id }
+            if(findMarker != null){
+                val index = course.markers.indexOf(findMarker)
+                course.markers.removeAt(index)
+                updateMarker.status = MarkerStatus.TARGET
+                course.markers.add(index, updateMarker)
+            }
+        }
+
+        task { retrieveTask(auth.currentUser!!.uid)} then {
+            task -> task.addOnCompleteListener {
+                user -> val findUser = user.result
+                updateMarker(marker, findUser.courseObject)
+                updateTask(findUser)
+            }
+        }
+    }
+
 }

@@ -3,7 +3,11 @@ package com.lxdnz.nz.ariaorienteering
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.lxdnz.nz.ariaorienteering.model.Course
+import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.model.types.ImageType
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith;
@@ -27,11 +31,18 @@ class UserUnitTest {
 
     lateinit var mockedDatabaseReference: DatabaseReference
     lateinit var testUser: User
+    lateinit var testCourse: Course
+    lateinit var mockMarkerList: MutableList<Marker>
 
     @Before
     fun before() {
         // Set up test User
         testUser = User("1A", "a@b.com", "Jim", 0.0, 0.0, true)
+        //Set up test Course
+        val marker1 = Marker()
+        val marker2 = Marker()
+        mockMarkerList = mutableListOf(marker1, marker2)
+        testCourse = Course("A", 5, mockMarkerList)
 
         // Mock the Firebase References
         mockedDatabaseReference = PowerMockito.mock(DatabaseReference::class.java)
@@ -80,4 +91,41 @@ class UserUnitTest {
         assertTrue("User latitude match" , lat == 0.0)
         assertTrue("User longitude matches", lon == 0.0)
     }
+
+    @Test
+    fun testUpdateMarkerInUserCourse() {
+        val u = testUser
+        u.courseObject = testCourse
+        val markerListSize = testCourse.markers.size
+        val newMarker = Marker(100, ImageType.DEFAULT, 0.0, 0.0)
+        val updateMarker_1 = Marker(100, ImageType.DEFAULT, 0.0, 0.0)
+        val updateCourse = u.courseObject
+
+        // write the inner function / implementation code
+        fun testMarkerCheck(marker: Marker) {
+
+            val findMarker = updateCourse!!.markers.find { it -> it.id == marker.id }
+            if(findMarker != null){
+                val index = updateCourse.markers.indexOf(findMarker)
+                updateCourse.markers.removeAt(index)
+                marker.status = MarkerStatus.FOUND
+                updateCourse.markers.add(index, marker)
+            }
+        }
+
+        //add the first Marker
+        updateCourse!!.markers.add(newMarker)
+        // test marker added to list
+        assertEquals("Marker List size increased", markerListSize+1, updateCourse.markers.size)
+
+        // perform the method to check for match, update status if match
+        testMarkerCheck(updateMarker_1)
+
+        // test
+        assertEquals("Marker List size did not increase", markerListSize+1, updateCourse.markers.size)
+        val updatedMarker = updateCourse.markers.find { it -> it.id == updateMarker_1.id }
+        val updateIndex = updateCourse.markers.indexOf(updatedMarker)
+        assertEquals("Marker is now Found", MarkerStatus.FOUND, updateCourse.markers[updateIndex].status)
+    }
+
 }

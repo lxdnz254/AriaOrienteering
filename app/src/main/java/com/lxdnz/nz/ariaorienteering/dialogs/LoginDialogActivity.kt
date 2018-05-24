@@ -120,7 +120,8 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
                         Log.e(TAG, "signInWithCredential: Success!")
                         val user = mAuth!!.currentUser
                         // insert a user object here
-                        val activeUser = User.create(user?.uid, user?.email, firstName, location!!.longitude, location!!.latitude ,true)
+                        val activeUser = User.create(user?.uid, user?.email,
+                                firstName, location!!.longitude, location!!.latitude ,true)
                         updateUI(activeUser)
                         // return to main
                         saveState?.putBoolean(LOGGED_IN, true)

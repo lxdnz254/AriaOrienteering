@@ -58,7 +58,7 @@ class HelpFragment : Fragment() {
     }
 
     private fun UpdateUI(user: User) {
-        help_text.text = "Hello " + user.firstName + "! Do you need help with course " + user.course_object?.id + "?"
+        help_text.text = "Hello " + user.firstName + "! Do you need help with course " + user.courseObject?.id + "?"
     }
 
     // TODO: Rename method, update argument and hook method into UI event

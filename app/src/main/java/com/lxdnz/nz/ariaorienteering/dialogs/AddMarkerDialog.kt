@@ -20,6 +20,7 @@ import com.lxdnz.nz.ariaorienteering.services.LocationService
 class AddMarkerDialog: DialogFragment() {
 
     private val TAG = "AddMarkerDialog"
+    //TODO: Add these arrays to resources files R.arrays.*
     val courseArray = arrayOf("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L")
     val courseChecked = booleanArrayOf(false,false,false,false,false,false,false,false,false,false,false,false)
     lateinit var gps: LocationService
@@ -28,7 +29,8 @@ class AddMarkerDialog: DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
         getLocation()
-        val inflater: LayoutInflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater: LayoutInflater =
+                requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val view = inflater.inflate(R.layout.add_marker_dialog, null)
 
         val gridView: GridView = view.findViewById(R.id.course_grid_view)
@@ -38,14 +40,16 @@ class AddMarkerDialog: DialogFragment() {
 
         builder.setView(view)
 
-                .setPositiveButton("ADD", DialogInterface.OnClickListener() { dialog: DialogInterface, i: Int ->
+                .setPositiveButton("ADD", DialogInterface.OnClickListener() {
+                    dialog: DialogInterface, i: Int ->
                     // ADD the marker
                     Log.i(TAG, "Adding Marker")
                     // TODO: Add validation or Observer for editMarkerNumber
                     val idText: EditText = view.findViewById(R.id.editMarkerNumber)
                     val id = idText.text.toString().toInt()
                     // Add the marker to the system
-                    val marker = Marker.create(id, ImageType.DEFAULT, location!!.latitude, location!!.longitude)
+                    val marker = Marker.create(id, ImageType.DEFAULT,
+                            location!!.latitude, location!!.longitude)
                     // iterate over course arrays and add the marker to the course
                     for (j in 0 until courseArray.size) {
                         if (courseChecked[j]) {
@@ -54,7 +58,8 @@ class AddMarkerDialog: DialogFragment() {
                         }
                     }
                 })
-                .setNegativeButton("CANCEL", DialogInterface.OnClickListener() { dialog: DialogInterface, id: Int ->
+                .setNegativeButton("CANCEL", DialogInterface.OnClickListener() {
+                    dialog: DialogInterface, id: Int ->
                     dialog.cancel()
                 })
 
