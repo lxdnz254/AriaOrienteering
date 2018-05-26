@@ -11,12 +11,14 @@ import android.os.*
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import com.lxdnz.nz.ariaorienteering.model.User
+
 import com.lxdnz.nz.ariaorienteering.services.location.LocationTracker
 import com.lxdnz.nz.ariaorienteering.services.location.LocationTrackerFallback
 import com.lxdnz.nz.ariaorienteering.services.location.LocationTrackerProvider
 
-
+/**
+ * Service for operating Location tracking
+ */
 
 class LocationService(): Service(), LocationTracker {
 

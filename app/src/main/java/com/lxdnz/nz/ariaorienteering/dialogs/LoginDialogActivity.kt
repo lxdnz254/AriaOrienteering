@@ -17,6 +17,7 @@ import android.location.Location
 import android.support.design.widget.TextInputLayout
 import android.view.inputmethod.InputMethodManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.GoogleAuthProvider
 import com.lxdnz.nz.ariaorienteering.BuildConfig
 import com.lxdnz.nz.ariaorienteering.R

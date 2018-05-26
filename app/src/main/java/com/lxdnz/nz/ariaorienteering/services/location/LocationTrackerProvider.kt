@@ -1,12 +1,15 @@
 package com.lxdnz.nz.ariaorienteering.services.location
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import com.lxdnz.nz.ariaorienteering.model.User
+
+/**
+ * Class to provide the implementation for Location Tracking
+ */
 
 class LocationTrackerProvider():  LocationListener, LocationTracker {
 
@@ -39,8 +42,6 @@ class LocationTrackerProvider():  LocationListener, LocationTracker {
     protected var lm: LocationManager? = null
 
     // uninitialised variables
-    lateinit var sharedPreferences: SharedPreferences
-
 
     /**
      * LocationTracker Methods

@@ -7,6 +7,8 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -21,6 +23,7 @@ import android.widget.Toast
 
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task
@@ -64,6 +67,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     val TAG: String = "MapFragment"
     val MY_PERMISSIONS_REQUEST_LOCATION = 99
+    val RADIUS = 5.0f
     lateinit var mMapView: MapView
     private lateinit var googleMap: GoogleMap
     lateinit var locationService: LocationService
@@ -264,8 +268,41 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         clusterManagement(mClusterManager2, foundMarkers)
         clusterManagement(mClusterManager3, targetMarker)
 
+        // get current Location and test the markers
+        val currentLocation = locationService.getLocation()
+        if (currentLocation != null) {
+            testProximity(targetMarker, currentLocation)
+            testProximity(notFoundMarkers, currentLocation)
+        }
+
     }
 
+    /**
+     * Check the distance to all un-found markers
+     */
+    private fun testProximity(markers: MutableList<Marker>, currentLocation: Location) {
+
+        val updateMarker = mutableListOf<Marker>()
+        markers.forEach { marker ->
+
+            Log.d(TAG, "Location test:" + currentLocation.latitude + " -> " + marker.lat)
+            val target = Location("target")
+            target.longitude = marker.lon
+            target.latitude = marker.lat
+            val distance = currentLocation.distanceTo(target)
+            Log.d(TAG, "distance: " + distance)
+            if(distance < RADIUS) {
+                Toast.makeText(mContext, "You've found a marker", Toast.LENGTH_SHORT).show()
+                updateMarker.add(marker)
+            }
+        }
+        // update markers within the distance to found
+        if (updateMarker.size > 0) {
+            updateMarker.forEach { marker ->
+                User.findMarker(marker)
+            }
+        }
+    }
 
     /**
      * private function to manage many clusters

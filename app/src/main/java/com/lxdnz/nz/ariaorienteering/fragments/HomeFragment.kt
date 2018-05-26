@@ -16,7 +16,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.User
-import com.lxdnz.nz.ariaorienteering.tasks.GeofenceTask
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
@@ -119,9 +118,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun startRandomCourse(course: Course) {
-
-        // geofence markers
-        course.markers.forEach({marker -> GeofenceTask.addGeofence(marker)})
 
         //start timer
     }

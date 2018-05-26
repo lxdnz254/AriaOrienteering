@@ -1,10 +1,14 @@
 package com.lxdnz.nz.ariaorienteering.services.location
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import android.location.LocationManager
 
+/**
+ * Fallback Location Tracking.
+ * If GPS is not available, use the Network provider type
+ * Mainly operates when device moves indoors
+ */
 class LocationTrackerFallback(): LocationTracker,LocationTracker.LocationUpdateListener {
 
     constructor(context: Context, type: LocationTrackerProvider.ProviderType): this() {
