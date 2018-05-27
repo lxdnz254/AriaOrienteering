@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.GoogleAuthProvider
 import com.lxdnz.nz.ariaorienteering.BuildConfig
+import com.lxdnz.nz.ariaorienteering.MainActivity
 import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.User
 import com.lxdnz.nz.ariaorienteering.services.LocationService
@@ -28,7 +29,7 @@ import nl.komponents.kovenant.then
 
 
 /**
- * A login screen that offers login via email/password to Firebase.
+ * A login screen that offers login via Google Account to Firebase.
  */
 class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
@@ -79,6 +80,7 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
 
         task {  User.retrieve(currentUser?.uid) } then
                 {task -> task.addOnCompleteListener{user -> updateUI(user.result)} }
+
     }
 
     override fun onClick(view: View?) {
@@ -121,8 +123,16 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
                         Log.e(TAG, "signInWithCredential: Success!")
                         val user = mAuth!!.currentUser
                         // insert a user object here
+                        val userLocation = Location("user")
+                        if (location?.latitude != null) {
+                            userLocation.longitude = location!!.longitude
+                            userLocation.latitude = location!!.latitude
+                        } else {
+                            userLocation.longitude = 0.0
+                            userLocation.latitude = 0.0
+                        }
                         val activeUser = User.create(user?.uid, user?.email,
-                                firstName, location!!.longitude, location!!.latitude ,true)
+                                firstName, userLocation.longitude, userLocation.latitude ,true)
                         updateUI(activeUser)
                         // return to main
                         saveState?.putBoolean(LOGGED_IN, true)
@@ -217,6 +227,19 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
     private fun getLocation() {
 
         gps = LocationService(this.baseContext)
-        location = gps.getLocation()
+        if(!gps.isServiceRunning) {
+            val i = Intent(this, LocationService::class.java)
+            this.startService(i)
+            gps = LocationService(this)
+        }
+        if (gps.hasLocation()) {
+            location = gps.getLocation()
+        }
+    }
+
+    override fun finish() {
+        val i = Intent(this, MainActivity::class.java)
+        startActivity(i)
+        super.finish()
     }
 }

@@ -56,6 +56,16 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Login Intent
+        val i = Intent(this, LoginDialogActivity::class.java)
+        // check if logged in : Launch Login Activity if not
+        if (mAuth.currentUser == null){
+            startActivity(i)
+        } else {
+            //TODO: Update the LOGGED_IN text on the UI
+            LOGGED_IN = "Logged In"
+        }
+
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(toolbar)
@@ -69,9 +79,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
 
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
-
-        // Login Intent
-        val i = Intent(this, LoginDialogActivity::class.java)
 
         // Button Touch Listener
 
@@ -106,13 +113,6 @@ class MainActivity : AppCompatActivity(), HomeFragment.OnFragmentInteractionList
         })
         sharedPreferences = getSharedPreferences(MY_PREFS, Context.MODE_PRIVATE)
 
-        // check if logged in : Launch Login Activity if not
-        if (mAuth.currentUser == null){
-            startActivity(i)
-        } else {
-            //TODO: Update the LOGGED_IN text on the UI
-            LOGGED_IN = "Logged In"
-        }
     }
 
     override fun onStart() {

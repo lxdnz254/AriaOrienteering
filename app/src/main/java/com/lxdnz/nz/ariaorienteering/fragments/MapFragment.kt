@@ -91,18 +91,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         locationService = LocationService(mContext)
         intent = Intent(activity, LocationService::class.java)
 
-        /**
-         * Keep track of the current user with the View Model and update UI accordingly
-         */
-        val userViewModel: UserViewModel = ViewModelProviders
-                .of(this)
-                .get(UserViewModel::class.java)
-        val userLiveData = userViewModel.getLiveUserData()
-        userLiveData.observe(this, Observer { user: User? ->
-            if (user != null) {
-                adminUpdateUI(user)
-            }
-        })
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -123,6 +112,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         sMapFragment.getMapAsync(this)
+
+        /**
+         * Keep track of the current user with the View Model and update UI accordingly
+         */
+        val userViewModel: UserViewModel = ViewModelProviders
+                .of(this)
+                .get(UserViewModel::class.java)
+        val userLiveData = userViewModel.getLiveUserData()
+        userLiveData.observe(this, Observer { user: User? ->
+            if (user != null) {
+                adminUpdateUI(user)
+            }
+        })
 
         return rootView
     }
@@ -165,7 +167,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                     googleMap.isMyLocationEnabled = true
-                    googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
+                    googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
                     googleMap.uiSettings.isZoomControlsEnabled = true
                     googleMap.uiSettings.isCompassEnabled = true
                 } else {

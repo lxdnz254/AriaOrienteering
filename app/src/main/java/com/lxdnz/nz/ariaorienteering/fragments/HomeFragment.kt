@@ -5,17 +5,22 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
+import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 
 import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.Course
+import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
@@ -40,27 +45,13 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
+    private var gameTime:Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
-        }
-
-        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
-        val userLiveData = userViewModel.getLiveUserData()
-        userLiveData.observe(this, Observer { user: User? ->
-            if (user != null) {
-                updateUI(user)
-            }
-        })
-    }
-
-    fun updateUI(user: User) {
-        home_text.text = getString(R.string.change_home) + ' ' + user.firstName
-        if (user.courseObject != null) {
-            course_selected.text = getString(R.string.select_course) + ' ' + user.courseObject!!.id
         }
     }
 
@@ -74,12 +65,44 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val userViewModel: UserViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userLiveData = userViewModel.getLiveUserData()
+        userLiveData.observe(this, Observer { user: User? ->
+            if (user != null) {
+                updateUI(user)
+            }
+        })
 
+        activateButton(startActionButton)
+
+    }
+
+    fun updateUI(user: User) {
+        home_text.text = getString(R.string.change_home) + ' ' + user.firstName
+        if (user.courseObject != null) {
+            // check for All course markers complete then stop timer
+            if (checkMarkersFound(user.courseObject?.markers)) {
+                course_selected.text = "Congratulations! " + user.firstName + " you found all the markers"
+                timerMeter.stop()
+                // make startButton visible
+                startActionButton.visibility = View.VISIBLE
+            } else {
+                course_selected.text = getString(R.string.select_course) + ' ' + user.courseObject!!.id
+            }
+        }
+    }
+
+    private fun checkMarkersFound(markers: MutableList<Marker>?): Boolean {
+
+        return markers!!.all{marker -> marker.status.equals(MarkerStatus.FOUND)  }
+    }
+
+    private fun activateButton(button: FloatingActionButton) {
         var dX = 0f
         var dY = 0f
         var startX = 0f
         var startY = 0f
-        startActionButton.setOnTouchListener(View.OnTouchListener {v: View, event: MotionEvent ->
+        button.setOnTouchListener( {v: View, event: MotionEvent ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     dX = v.x - event.rawX
@@ -95,31 +118,41 @@ class HomeFragment : Fragment() {
                 }
                 MotionEvent.ACTION_UP -> {
                     if (Math.abs(startX - event.rawX) < 10 && Math.abs(startY - event.rawY)  < 10) {
-                        Toast.makeText(v.context, "Selecting Random Course", Toast.LENGTH_SHORT).show()
-                        selectRandomCourse()
+                        when(button) {
+                            startActionButton -> {
+                                Toast.makeText(v.context, "Selecting Random Course", Toast.LENGTH_SHORT).show()
+                                selectRandomCourse()
+                                startTimer()
+                            }
+                        }
+
                     }
-                   true
+                    true
                 }
                 else -> false
             }
+
         })
+
     }
-
-
 
 
     private fun selectRandomCourse() {
         task { Course.selectRandomCourse() } then { task ->
             task.addOnCompleteListener { course ->
                 User.addCourse(course.result)
-                startRandomCourse(course.result)
             }
         }
     }
 
-    private fun startRandomCourse(course: Course) {
+    private fun startTimer() {
 
         //start timer
+        timerMeter.base = SystemClock.elapsedRealtime() + gameTime
+        timerMeter.start()
+        //TODO: Once the course completion implementation is done activate this action.
+        // make start button in accessible
+        startActionButton.visibility = View.GONE
     }
 
     // TODO: Rename method, update argument and hook method into UI event

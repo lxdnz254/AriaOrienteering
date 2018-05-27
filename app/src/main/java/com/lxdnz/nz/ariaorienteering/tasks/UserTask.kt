@@ -35,7 +35,7 @@ object UserTask {
 
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val user = snapshot.getValue(User::class.java)
-                    Log.i("onDataChange", user?.uid + ":" + user!!.firstName)
+                    Log.i("onDataChange", user?.uid + ":" + user?.firstName)
                     tcs.setResult(user)
                 }
             })

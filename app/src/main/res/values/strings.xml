@@ -31,7 +31,7 @@
     <string name="hello_home_fragment">Hello User at the Home Fragment</string>
     <string name="hello_map_fragment">This is the Map Fragment</string>
     <string name="hello_help_fragment">Hello User who needs help</string>
-    <string name="change_home">Hey you\'ve changed the home page!</string>
+    <string name="change_home">Welcome to the Aria Orienteering Event</string>
     <string name="select_course">The course selected for you is:</string>
     <string name="no_course">No Course selected yet</string>
     <string name="geofence_transition_invalid_type">Invalid Geofence Tranisiton Type</string>
@@ -42,6 +42,6 @@
     <string name="geofence_not_available">The geofence is not available</string>
     <string name="geofence_too_many_geofences">There are too many geofences in the system</string>
     <string name="geofence_too_many_pending_intents">There are too many Intents for the system</string>
-    <string name="unknown_geofence_error">An unknown geofence error occured</string>
+    <string name="unknown_geofence_error">An unknown geofence error occurred</string>
     <string name="add_marker">ADD MARKER</string>
 </resources>
