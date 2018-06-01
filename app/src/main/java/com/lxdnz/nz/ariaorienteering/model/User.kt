@@ -15,6 +15,8 @@ class User {
             var lon: Double = 0.0
             var courseObject: Course? = null
             var active: Boolean = true
+            var homeActive = false
+            var homeMarker: Marker? = null
 
     constructor() {
         // Default constructor required for calls to DataSnapshot
@@ -64,8 +66,8 @@ class User {
             return UserTask.activateUserTask(uid!!)
         }
 
-        override fun addCourse(course: Course?) {
-            UserTask.addCourseTask(course!!)
+        override fun addCourse(course: Course?, marker: Marker) {
+            UserTask.addCourseTask(course!!, marker)
         }
 
         override fun targetMarker(marker: Marker) {
@@ -74,6 +76,14 @@ class User {
 
         override fun findMarker(marker: Marker) {
             UserTask.findMarkerTask(marker)
+        }
+
+        override fun addHomeMarker(marker: Marker?, active: Boolean) {
+            UserTask.homeMarkerTask(marker!!, active)
+        }
+
+        fun finishCourse() {
+            UserTask.finishCourseTask()
         }
 
     }
@@ -94,9 +104,11 @@ interface UserFactory {
 
     fun activate(uid: String?): Task<User>
 
-    fun addCourse(course: Course?)
+    fun addCourse(course: Course?, marker: Marker)
 
     fun targetMarker(marker: Marker)
 
     fun findMarker(marker: Marker)
+
+    fun addHomeMarker(marker: Marker?, active: Boolean)
 }

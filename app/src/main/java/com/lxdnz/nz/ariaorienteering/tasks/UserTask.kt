@@ -63,15 +63,20 @@ object UserTask {
             }
         }
 
-        fun addCourseTask(course: Course?) {
+        fun addCourseTask(course: Course?, marker: Marker) {
             task {
                 retrieveTask(auth.currentUser!!.uid)
             } then {
                 task -> task.addOnCompleteListener {
                     user -> val courseUser = user.result
-                    courseUser.courseObject = course!!
-                    course.markers.forEach({marker ->
+                    // associate the course to the user
+                    courseUser.courseObject = course
+                    course?.markers?.forEach({marker ->
                         marker.status = MarkerStatus.NOT_FOUND})
+                    // add homeMarker and de-activate to current User
+                    courseUser.homeActive = false
+                    courseUser.homeMarker = marker
+                    // update the user
                     updateTask(courseUser)
                 }
             }
@@ -163,6 +168,31 @@ object UserTask {
                 updateTask(findUser)
             }
         }
+    }
+
+    fun homeMarkerTask(marker: Marker, active: Boolean) {
+        task { retrieveTask(auth.currentUser!!.uid)} then {
+            task -> task.addOnCompleteListener {
+                user -> val findUser = user.result
+                findUser.homeActive = active
+                findUser.homeMarker = marker
+                updateTask(findUser)
+            }
+        }
+    }
+
+    fun finishCourseTask() {
+        task { retrieveTask(auth.currentUser!!.uid)} then {
+            task -> task.addOnCompleteListener {
+                user -> val finishedUser = user.result
+                finishedUser.homeActive = false
+                finishedUser.courseObject = null
+                finishedUser.homeMarker = null
+                updateTask(finishedUser)
+            }
+        }
+
+
     }
 
 }

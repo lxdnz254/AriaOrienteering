@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -20,7 +21,9 @@ import com.lxdnz.nz.ariaorienteering.R
 import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.Marker
 import com.lxdnz.nz.ariaorienteering.model.User
+import com.lxdnz.nz.ariaorienteering.model.types.ImageType
 import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
+import com.lxdnz.nz.ariaorienteering.services.LocationService
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
@@ -46,6 +49,9 @@ class HomeFragment : Fragment() {
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
     private var gameTime:Long = 0
+
+    private val TAG = "Home Fragment"
+    private var toastCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,14 +88,44 @@ class HomeFragment : Fragment() {
         if (user.courseObject != null) {
             // check for All course markers complete then stop timer
             if (checkMarkersFound(user.courseObject?.markers)) {
-                course_selected.text = "Congratulations! " + user.firstName + " you found all the markers"
-                timerMeter.stop()
-                // make startButton visible
-                startActionButton.visibility = View.VISIBLE
-            } else {
-                course_selected.text = getString(R.string.select_course) + ' ' + user.courseObject!!.id
+
+                // activate home marker
+                if (user.homeMarker != null) {
+                    if (!user.homeActive && toastCount == 0) {
+                        Toast.makeText(requireContext(), "All markers found, Head for Home", Toast.LENGTH_SHORT).show()
+                        User.addHomeMarker(user.homeMarker, true)
+                        toastCount++
+                    } else {
+                        Log.i(TAG, "found markers, home Active")
+                        if (user.homeMarker!!.status.equals(MarkerStatus.FOUND) && toastCount == 1) {
+                            // do this bit when home marker is found
+                            timerMeter.stop()
+                            Toast.makeText(requireContext(), "You have finished", Toast.LENGTH_SHORT).show()
+                            toastCount++
+                            // make startButton visible
+                            startActionButton.visibility = View.VISIBLE
+                        }
+                    }
+                }
             }
         }
+        when (toastCount)
+        {
+            0 -> {if (user.courseObject != null){
+                course_selected.text = getString(R.string.select_course) + ' ' + user.courseObject!!.id
+                } else {
+                course_selected.text = getString(R.string.no_course)
+            }
+            }
+            1 -> {course_selected.text = "Congratulations! " + user.firstName + " you found all the markers. Head for Home"}
+            else -> {course_selected.text = "Congratulations! " + user.firstName + " you made it Home"
+                // update user status
+                if (user.homeActive) {
+                    User.finishCourse()
+                }
+            }
+        }
+
     }
 
     private fun checkMarkersFound(markers: MutableList<Marker>?): Boolean {
@@ -138,9 +174,16 @@ class HomeFragment : Fragment() {
 
 
     private fun selectRandomCourse() {
+        // requires a home target, sent to Firebase as one update to limit calls to DB
+        val currentLocation = LocationService(requireContext()).getLocation()
+
+        val homeMarker = Marker(1000, ImageType.DEFAULT, currentLocation!!.latitude, currentLocation.longitude)
+
         task { Course.selectRandomCourse() } then { task ->
             task.addOnCompleteListener { course ->
-                User.addCourse(course.result)
+
+                homeMarker.status = MarkerStatus.NOT_FOUND
+                User.addCourse(course.result, homeMarker)
             }
         }
     }
@@ -150,8 +193,8 @@ class HomeFragment : Fragment() {
         //start timer
         timerMeter.base = SystemClock.elapsedRealtime() + gameTime
         timerMeter.start()
-        //TODO: Once the course completion implementation is done activate this action.
-        // make start button in accessible
+        toastCount == 0
+        // make start button inaccessible
         startActionButton.visibility = View.GONE
     }
 

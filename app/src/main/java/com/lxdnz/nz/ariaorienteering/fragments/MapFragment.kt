@@ -22,12 +22,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.maps.android.clustering.ClusterManager
 
 import com.lxdnz.nz.ariaorienteering.R
@@ -64,6 +59,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var param1: String? = null
     private var param2: String? = null
     private var listener: OnFragmentInteractionListener? = null
+    private var adminToast = false
 
     val TAG: String = "MapFragment"
     val MY_PERMISSIONS_REQUEST_LOCATION = 99
@@ -77,6 +73,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     lateinit var mClusterManager1: ClusterManager<StringClusterItem>
     lateinit var mClusterManager2: ClusterManager<StringClusterItem>
     lateinit var mClusterManager3: ClusterManager<StringClusterItem>
+    lateinit var mClusterManager4: ClusterManager<StringClusterItem>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,7 +134,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         AdminTask.checkAdmin(user.firstName).addOnCompleteListener { task ->
             if (task.result) {
-                Toast.makeText(mContext, "Logged as admin", Toast.LENGTH_SHORT).show()
+                if (!adminToast) {
+                    Toast.makeText(mContext, "Logged as admin", Toast.LENGTH_SHORT).show()
+                    adminToast = true
+                }
                 // show add marker button and set on click
                 adminMarker.visibility = View.VISIBLE
                 adminMarker.setOnClickListener(View.OnClickListener { it -> addMarker() })
@@ -195,21 +195,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 val lat = locationService.getLocation()!!.latitude
                 val lon = locationService.getLocation()!!.longitude
 
-                googleMap.addMarker(MarkerOptions()
-                        .position(LatLng(lat, lon))
-                        .title("You are here!")
-                        .icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)))
+                // not adding a marker to the map at this point
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
             } else if (locationService.hasPossiblyStaleLocation()) {
                 val lat = locationService.getPossiblyStaleLocation()!!.latitude
                 val lon = locationService.getPossiblyStaleLocation()!!.longitude
 
-                googleMap.addMarker(MarkerOptions()
-                        .position(LatLng(lat, lon))
-                        .title("You were last known to be here!")
-                        .icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)))
+                // not adding a marker to map at this point
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), 16.0f))
             } else {
                 // can't get location
@@ -219,9 +211,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             mClusterManager1 = ClusterManager(mContext, googleMap)
             mClusterManager2 = ClusterManager(mContext, googleMap)
             mClusterManager3 = ClusterManager(mContext, googleMap)
+            mClusterManager4 = ClusterManager(mContext, googleMap)
             setClusterManger(mClusterManager1, MarkerStatus.NOT_FOUND)
             setClusterManger(mClusterManager2, MarkerStatus.FOUND)
             setClusterManger(mClusterManager3, MarkerStatus.TARGET)
+            setClusterManger(mClusterManager4, MarkerStatus.TARGET)
 
         } catch (se: SecurityException) {
             // dialog for activating locations here
@@ -248,7 +242,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         Log.i(TAG, "refreshing Markers")
         // TODO: add onClick function to target Marker
-
         val courseMarkers = user.courseObject!!.markers
 
         val notFoundMarkers = mutableListOf<Marker>()
@@ -277,6 +270,25 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             testProximity(notFoundMarkers, currentLocation)
         }
 
+        if (user.homeActive) {
+
+            val homeList = mutableListOf<Marker>(user.homeMarker as Marker)
+
+            clusterManagement(mClusterManager4, homeList)
+            // Test current Location proximity to home
+            Log.d(TAG, "Home Location test:" + currentLocation!!.latitude + " -> " + user.homeMarker!!.lat)
+            val target = Location("target")
+            target.longitude = user.homeMarker!!.lon
+            target.latitude = user.homeMarker!!.lat
+            val distance = currentLocation!!.distanceTo(target)
+            Log.d(TAG, "distance: " + distance)
+            if(distance < RADIUS) {
+                user.homeMarker!!.status = MarkerStatus.FOUND
+
+                User.update(user)
+            }
+        }
+
     }
 
     /**
@@ -298,8 +310,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 updateMarker.add(marker)
             }
         }
-        // update markers within the distance to found
+        // update markers within the distance to MarkerStatus.FOUND
         if (updateMarker.size > 0) {
+            Log.i(TAG, "Found a marker:" + updateMarker[0].id)
             updateMarker.forEach { marker ->
                 User.findMarker(marker)
             }
