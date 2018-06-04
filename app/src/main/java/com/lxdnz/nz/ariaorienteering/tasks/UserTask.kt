@@ -148,23 +148,33 @@ object UserTask {
         }
     }
 
-    fun targetMarker(marker: Marker) {
+    fun targetMarker(id : String) {
         // write the inner function / implementation code
-        fun updateMarker(updateMarker: Marker, course: Course?) {
+        fun updateMarkerToTarget(course: Course?) {
 
-            val findMarker = course!!.markers.find { it -> it.id == updateMarker.id }
+            // first find any existing TARGET markers and set to NOT_FOUND
+            val targetMarkers = course!!.markers.filter { it -> it.status.equals(MarkerStatus.TARGET) }
+            targetMarkers.forEach({marker ->
+                val ind = course.markers.indexOf(marker)
+                course.markers.removeAt(ind)
+                marker.status = MarkerStatus.NOT_FOUND
+                course.markers.add(ind, marker)
+            })
+
+            // Then update the selected marker
+            val findMarker = course.markers.find { it -> it.id == id.toInt()}
             if(findMarker != null){
                 val index = course.markers.indexOf(findMarker)
                 course.markers.removeAt(index)
-                updateMarker.status = MarkerStatus.TARGET
-                course.markers.add(index, updateMarker)
+                findMarker.status = MarkerStatus.TARGET
+                course.markers.add(index, findMarker)
             }
         }
 
         task { retrieveTask(auth.currentUser!!.uid)} then {
             task -> task.addOnCompleteListener {
                 user -> val findUser = user.result
-                updateMarker(marker, findUser.courseObject)
+                updateMarkerToTarget(findUser.courseObject)
                 updateTask(findUser)
             }
         }

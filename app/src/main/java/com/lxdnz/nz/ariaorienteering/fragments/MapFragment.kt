@@ -217,6 +217,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             setClusterManger(mClusterManager3, MarkerStatus.TARGET)
             setClusterManger(mClusterManager4, MarkerStatus.TARGET)
 
+            googleMap.setOnMarkerClickListener(mClusterManager1)
+            clickListener(mClusterManager1)
+
         } catch (se: SecurityException) {
             // dialog for activating locations here
             Log.i(TAG, "Security Error")
@@ -276,7 +279,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
             clusterManagement(mClusterManager4, homeList)
             // Test current Location proximity to home
-            Log.d(TAG, "Home Location test:" + currentLocation!!.latitude + " -> " + user.homeMarker!!.lat)
+            //Log.d(TAG, "Home Location test:" + currentLocation!!.latitude + " -> " + user.homeMarker!!.lat)
             val target = Location("target")
             target.longitude = user.homeMarker!!.lon
             target.latitude = user.homeMarker!!.lat
@@ -337,6 +340,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
         // cluster to map
         mClusterManager.cluster()
+    }
+
+    fun clickListener(mClusterManager: ClusterManager<StringClusterItem>) {
+
+        mClusterManager.setOnClusterItemClickListener() {
+
+            it -> User.targetMarker(it.title)
+            Log.i(TAG, "Clicking Cluster Item")
+            true
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

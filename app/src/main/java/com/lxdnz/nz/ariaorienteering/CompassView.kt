@@ -53,8 +53,9 @@ class CompassView : View {
 
         if (bitmapWidth > canvasWidth || bitmapHeight > canvasHeight) {
             // resize bitmap to fit in canvas
-            bitmap = Bitmap.createScaledBitmap(bitmap!!,
-                    (bitmapWidth * 0.85).toInt(), (bitmapHeight * 0.85).toInt(), true)
+            val scaledWidth = (bitmapWidth * 0.85).toInt()
+            val scaledHeight = (bitmapHeight * 0.85).toInt()
+            bitmap = Bitmap.createScaledBitmap(bitmap!!, scaledWidth, scaledHeight, true)
         }
 
         // center

@@ -70,8 +70,8 @@ class User {
             UserTask.addCourseTask(course!!, marker)
         }
 
-        override fun targetMarker(marker: Marker) {
-            UserTask.targetMarker(marker)
+        override fun targetMarker(id: String) {
+            UserTask.targetMarker(id)
         }
 
         override fun findMarker(marker: Marker) {
@@ -106,7 +106,7 @@ interface UserFactory {
 
     fun addCourse(course: Course?, marker: Marker)
 
-    fun targetMarker(marker: Marker)
+    fun targetMarker(id: String)
 
     fun findMarker(marker: Marker)
 
