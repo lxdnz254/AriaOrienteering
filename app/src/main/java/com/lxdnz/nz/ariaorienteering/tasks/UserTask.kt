@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.lxdnz.nz.ariaorienteering.model.Course
 import com.lxdnz.nz.ariaorienteering.model.Marker
+import com.lxdnz.nz.ariaorienteering.model.Result
 import com.lxdnz.nz.ariaorienteering.model.User
 import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import nl.komponents.kovenant.task
@@ -88,7 +89,7 @@ object UserTask {
                 task.addOnCompleteListener { user ->
                     val deactivateUser = user.result
                     deactivateUser.active = false
-                    User.update(deactivateUser)
+                    updateTask(deactivateUser)
                     task { User.retrieve(uid) } then {
                         res -> res.addOnCompleteListener { it ->
                         if (it.result.active) {
@@ -109,7 +110,7 @@ object UserTask {
                 task.addOnCompleteListener { user ->
                     val activateUser = user.result
                     activateUser.active = true
-                    User.update(activateUser)
+                    updateTask(activateUser)
                     task {
                         User.retrieve(uid)
                     } then {
@@ -191,14 +192,16 @@ object UserTask {
         }
     }
 
-    fun finishCourseTask() {
+    fun finishCourseTask(time: String) {
         task { retrieveTask(auth.currentUser!!.uid)} then {
             task -> task.addOnCompleteListener {
                 user -> val finishedUser = user.result
+                val courseID = user.result.courseObject?.id
                 finishedUser.homeActive = false
                 finishedUser.courseObject = null
                 finishedUser.homeMarker = null
                 updateTask(finishedUser)
+                Result.create(finishedUser.uid, finishedUser.firstName, time, courseID)
             }
         }
 

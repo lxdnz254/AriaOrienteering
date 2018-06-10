@@ -121,7 +121,7 @@ class HomeFragment : Fragment() {
             else -> {course_selected.text = "Congratulations! " + user.firstName + " you made it Home"
                 // update user status
                 if (user.homeActive) {
-                    User.finishCourse()
+                    User.finishCourse(timerMeter.text.toString())
                 }
             }
         }

@@ -82,8 +82,8 @@ class User {
             UserTask.homeMarkerTask(marker!!, active)
         }
 
-        fun finishCourse() {
-            UserTask.finishCourseTask()
+        fun finishCourse(time: String) {
+            UserTask.finishCourseTask(time)
         }
 
     }
