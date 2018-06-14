@@ -52,14 +52,20 @@ object UserTask {
         }
 
         fun moveTask(location: Location?) {
-            task {
-                retrieveTask(auth.currentUser!!.uid)
-            } then {
-                task -> task.addOnCompleteListener {
-                    user -> val moveUser = user.result
-                    moveUser.lon = location!!.longitude
-                    moveUser.lat = location.latitude
-                    updateTask(moveUser)
+            Log.i("start MoveTask", " Checking user " + auth.currentUser)
+            if (auth.currentUser != null) {
+                Log.i("moveTask", " User is not null")
+                task {
+                    retrieveTask(auth.currentUser!!.uid)
+                } then { task ->
+                    task.addOnCompleteListener { user ->
+                        val moveUser = user.result
+                        if (location != null) {
+                            moveUser.lon = location.longitude
+                            moveUser.lat = location.latitude
+                            updateTask(moveUser)
+                        }
+                    }
                 }
             }
         }

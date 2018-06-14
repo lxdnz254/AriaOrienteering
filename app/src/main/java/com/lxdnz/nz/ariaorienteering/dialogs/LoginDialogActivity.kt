@@ -69,7 +69,7 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
                 .build()
 
         mAuth = FirebaseAuth.getInstance()
-        getLocation()
+
     }
 
     override fun onStart() {
@@ -121,6 +121,8 @@ class LoginDialogActivity : AppCompatActivity(), View.OnClickListener, GoogleApi
                     if (task.isSuccessful) {
                         // Sign in success
                         Log.e(TAG, "signInWithCredential: Success!")
+                        // moved here to avoid null pointers
+                        getLocation()
                         val user = mAuth!!.currentUser
                         // insert a user object here
                         val userLocation = Location("user")

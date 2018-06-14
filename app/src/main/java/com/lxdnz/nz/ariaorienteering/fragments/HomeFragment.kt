@@ -25,6 +25,7 @@ import com.lxdnz.nz.ariaorienteering.model.types.ImageType
 import com.lxdnz.nz.ariaorienteering.model.types.MarkerStatus
 import com.lxdnz.nz.ariaorienteering.services.LocationService
 import com.lxdnz.nz.ariaorienteering.viewmodel.UserViewModel
+import kotlinx.android.synthetic.main.fragment_help.view.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
@@ -75,6 +76,7 @@ class HomeFragment : Fragment() {
         val userLiveData = userViewModel.getLiveUserData()
         userLiveData.observe(this, Observer { user: User? ->
             if (user != null) {
+                Log.i(TAG, "update from Observer")
                 updateUI(user)
             }
         })
@@ -104,6 +106,7 @@ class HomeFragment : Fragment() {
                             toastCount++
                             // make startButton visible
                             startActionButton.visibility = View.VISIBLE
+                            startText.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -121,6 +124,7 @@ class HomeFragment : Fragment() {
             else -> {course_selected.text = "Congratulations! " + user.firstName + " you made it Home"
                 // update user status
                 if (user.homeActive) {
+                    Log.i(TAG, "finishing course")
                     User.finishCourse(timerMeter.text.toString())
                 }
             }
@@ -196,6 +200,7 @@ class HomeFragment : Fragment() {
         toastCount == 0
         // make start button inaccessible
         startActionButton.visibility = View.GONE
+        startText.visibility = View.GONE
     }
 
     // TODO: Rename method, update argument and hook method into UI event

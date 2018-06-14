@@ -74,7 +74,7 @@ object CourseTask {
 
         task { retrieveAllTask()} then {
             it.addOnCompleteListener {
-                courses -> val course = courses.result.random()
+                courses -> val course = courses.result.filter {course -> course?.year == 5  }.random()
                 tcs.setResult(course)}
         }
 

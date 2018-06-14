@@ -287,7 +287,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             Log.d(TAG, "distance: " + distance)
             if(distance < RADIUS) {
                 user.homeMarker!!.status = MarkerStatus.FOUND
-
+                Log.i(TAG, "Found Home Marker")
                 User.update(user)
             }
         }

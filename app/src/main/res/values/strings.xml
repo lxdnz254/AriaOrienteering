@@ -44,4 +44,5 @@
     <string name="geofence_too_many_pending_intents">There are too many Intents for the system</string>
     <string name="unknown_geofence_error">An unknown geofence error occurred</string>
     <string name="add_marker">ADD MARKER</string>
+    <string name="help_marker">Select a yellow marker on the map to target the location. It will change to an orange marker</string>
 </resources>
