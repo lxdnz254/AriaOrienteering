@@ -56,3 +56,6 @@ captures/
 freeline.py
 freeline/
 freeline_project_description.json
+libs/
+release/output.json
+sampledata/
