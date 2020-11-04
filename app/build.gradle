@@ -55,7 +55,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
-    implementation 'com.google.maps.android:android-maps-utils:0.6.1'
+    implementation 'com.google.maps.android:android-maps-utils:2.0.4'
     implementation 'nl.komponents.kovenant:kovenant-ui:3.3.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.powermock:powermock:1.6.6'
